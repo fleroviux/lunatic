@@ -46,45 +46,44 @@ enum class ThumbHighRegOp {
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_move_shifted_register(u16 opcode, T& client) -> U {
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = ARMDataOp::MOV,
-    .immediate = false,
-    .set_flags = true,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .op2_reg = {
-      .reg = bit::get_field<u16, GPR>(opcode, 3, 3),
-      .shift = {
-        .type = bit::get_field<u16, Shift>(opcode, 11, 2),
-        .immediate = true,
-        .amount_imm = bit::get_field(opcode, 6, 5)
-      }
-    }
-  });
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = ARMDataOp::MOV;
+  info.immediate = false;
+  info.set_flags = true;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.op2_reg.reg = bit::get_field<u16, GPR>(opcode, 3, 3);
+  info.op2_reg.shift.type = bit::get_field<u16, Shift>(opcode, 11, 2);
+  info.op2_reg.shift.immediate = true;
+  info.op2_reg.shift.amount_imm = bit::get_field(opcode, 6, 5);
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_add_sub(u16 opcode, T& client) -> U {
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = bit::get_bit(opcode, 9) ? ARMDataOp::SUB : ARMDataOp::ADD,
-    .immediate = bit::get_bit<u16, bool>(opcode, 10),
-    .set_flags = true,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .reg_op1 = bit::get_field<u16, GPR>(opcode, 3, 3),
-    .op2_reg = {
-      .reg = bit::get_field<u16, GPR>(opcode, 6, 3),
-      .shift = {
-        .type = Shift::LSL,
-        .immediate = true,
-        .amount_imm = 0
-      }
-    },
-    .op2_imm = {
-      .value = bit::get_field<u16, u8>(opcode, 6, 3),
-      .shift = 0
-    }
-  });
+  bool immediate = bit::get_bit<u16, bool>(opcode, 10);
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = bit::get_bit(opcode, 9) ? ARMDataOp::SUB : ARMDataOp::ADD;
+  info.immediate = immediate;
+  info.set_flags = true;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.reg_op1 = bit::get_field<u16, GPR>(opcode, 3, 3);
+
+  if (immediate) {
+    info.op2_imm.value = bit::get_field<u16, u8>(opcode, 6, 3);
+    info.op2_imm.shift = 0;
+  } else {
+    info.op2_reg.reg = bit::get_field<u16, GPR>(opcode, 6, 3);
+    info.op2_reg.shift.type = Shift::LSL;
+    info.op2_reg.shift.immediate = true;
+    info.op2_reg.shift.amount_imm = 0;
+  }
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -98,18 +97,18 @@ inline auto decode_mov_cmp_add_sub_imm(u16 opcode, T& client) -> U {
     case 0b11: op = ARMDataOp::SUB; break;
   }
 
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = op,
-    .immediate = true,
-    .set_flags = true,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3),
-    .reg_op1 = bit::get_field<u16, GPR>(opcode, 8, 3),
-    .op2_imm = {
-      .value = bit::get_field<u16, u8>(opcode, 0, 8),
-      .shift = 0
-    }
-  });
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = op;
+  info.immediate = true;
+  info.set_flags = true;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
+  info.reg_op1 = bit::get_field<u16, GPR>(opcode, 8, 3);
+  info.op2_imm.value = bit::get_field<u16, u8>(opcode, 0, 8);
+  info.op2_imm.shift = 0;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -119,66 +118,64 @@ inline auto decode_alu(u16 opcode, T& client) -> U {
   auto reg_src = bit::get_field<u16, GPR>(opcode, 3, 3);
 
   auto decode_dp_alu = [&](ARMDataOp op) {
-    return client.Handle(ARMDataProcessing{
-      .condition = Condition::AL,
-      .opcode = static_cast<ARMDataOp>(op),
-      .immediate = false,
-      .set_flags = true,
-      .reg_dst = reg_dst,
-      .reg_op1 = reg_dst,
-      .op2_reg = {
-        .reg = reg_src,
-        .shift = {
-          .type = Shift::LSL,
-          .immediate = true,
-          .amount_imm = 0
-        }
-      }
-    });
+    auto info = ARMDataProcessing{};
+
+    info.condition = Condition::AL;
+    info.opcode = static_cast<ARMDataOp>(op);
+    info.immediate = false;
+    info.set_flags = true;
+    info.reg_dst = reg_dst;
+    info.reg_op1 = reg_dst;
+    info.op2_reg.reg = reg_src;
+    info.op2_reg.shift.type = Shift::LSL;
+    info.op2_reg.shift.immediate = true;
+    info.op2_reg.shift.amount_imm = 0;
+
+    return client.Handle(info);
   };
 
   auto decode_dp_shift = [&](Shift type) {
-    return client.Handle(ARMDataProcessing{
-      .condition = Condition::AL,
-      .opcode = ARMDataOp::MOV,
-      .immediate = false,
-      .set_flags = true,
-      .reg_dst = reg_dst,
-      .op2_reg = {
-        .reg = reg_dst,
-        .shift = {
-          .type = type,
-          .immediate = false,
-          .amount_reg = reg_src
-        }
-      }
-    });
+    auto info = ARMDataProcessing{};
+
+    info.condition = Condition::AL;
+    info.opcode = ARMDataOp::MOV;
+    info.immediate = false;
+    info.set_flags = true;
+    info.reg_dst = reg_dst;
+    info.op2_reg.reg = reg_dst;
+    info.op2_reg.shift.type = type;
+    info.op2_reg.shift.immediate = false;
+    info.op2_reg.shift.amount_reg = reg_src;
+
+    return client.Handle(info);
   };
 
   auto decode_dp_neg = [&]() {
-    return client.Handle(ARMDataProcessing{
-      .condition = Condition::AL,
-      .opcode = ARMDataOp::RSB,
-      .immediate = true,
-      .set_flags = true,
-      .reg_dst = reg_dst,
-      .reg_op1 = reg_src,
-      .op2_imm = {
-        .value = 0,
-        .shift = 0
-      }
-    });
+    auto info = ARMDataProcessing{};
+
+    info.condition = Condition::AL;
+    info.opcode = ARMDataOp::RSB;
+    info.immediate = true;
+    info.set_flags = true;
+    info.reg_dst = reg_dst;
+    info.reg_op1 = reg_src;
+    info.op2_imm.value = 0;
+    info.op2_imm.shift = 0;
+
+    return client.Handle(info);
   };
 
   auto decode_mul = [&]() {
-    return client.Handle(ARMMultiply{
-      .condition = Condition::AL,
-      .accumulate = false,
-      .set_flags = true,
-      .reg_op1 = reg_dst,
-      .reg_op2 = reg_src,
-      .reg_dst = reg_dst
-    });
+    auto info = ARMMultiply{};
+
+    info.condition = Condition::AL;
+    info.accumulate = false;
+    info.set_flags = true;
+    info.reg_op1 = reg_dst;
+    info.reg_op2 = reg_src;
+    info.reg_dst = reg_dst;
+
+    return client.Handle(info);
   };
 
   switch (op) {
@@ -209,150 +206,146 @@ inline auto decode_high_register_ops(u16 opcode, T& client) -> U {
   auto reg_dst = static_cast<GPR>(bit::get_field(opcode, 0, 3) | high1);
   auto reg_src = static_cast<GPR>(bit::get_field(opcode, 3, 3) | high2);
 
+  // TODO: this can be shortened a lot.
+
   switch (op) {
     case ThumbHighRegOp::ADD: {
-      return client.Handle(ARMDataProcessing{
-        .condition = Condition::AL,
-        .opcode = ARMDataOp::ADD,
-        .immediate = false,
-        .set_flags = false,
-        .reg_dst = reg_dst,
-        .reg_op1 = reg_dst,
-        .op2_reg = {
-          .reg = reg_src,
-          .shift = {
-            .type = Shift::LSL,
-            .immediate = true,
-            .amount_imm = 0
-          }
-        }
-      });
+      auto info = ARMDataProcessing{};
+
+      info.condition = Condition::AL;
+      info.opcode = ARMDataOp::ADD;
+      info.immediate = false;
+      info.set_flags = false;
+      info.reg_dst = reg_dst;
+      info.reg_op1 = reg_dst;
+      info.op2_reg.reg = reg_src;
+      info.op2_reg.shift.type = Shift::LSL;
+      info.op2_reg.shift.immediate = true;
+      info.op2_reg.shift.amount_imm = 0;
+
+      return client.Handle(info);
     }
     case ThumbHighRegOp::CMP: {
-      return client.Handle(ARMDataProcessing{
-        .condition = Condition::AL,
-        .opcode = ARMDataOp::CMP,
-        .immediate = false,
-        .set_flags = true,
-        .reg_op1 = reg_dst,
-        .op2_reg = {
-          .reg = reg_src,
-          .shift = {
-            .type = Shift::LSL,
-            .immediate = true,
-            .amount_imm = 0
-          }
-        }
-      });
+      auto info = ARMDataProcessing{};
+
+      info.condition = Condition::AL;
+      info.opcode = ARMDataOp::CMP;
+      info.immediate = false;
+      info.set_flags = true;
+      info.reg_op1 = reg_dst;
+      info.op2_reg.reg = reg_src;
+      info.op2_reg.shift.type = Shift::LSL;
+      info.op2_reg.shift.immediate = true;
+      info.op2_reg.shift.amount_imm = 0;
+
+      return client.Handle(info);
     }
     case ThumbHighRegOp::MOV: {
-      return client.Handle(ARMDataProcessing{
-        .condition = Condition::AL,
-        .opcode = ARMDataOp::MOV,
-        .immediate = false,
-        .set_flags = false,
-        .reg_dst = reg_dst,
-        .op2_reg = {
-          .reg = reg_src,
-          .shift = {
-            .type = Shift::LSL,
-            .immediate = true,
-            .amount_imm = 0
-          }
-        }
-      });
+      auto info = ARMDataProcessing{};
+
+      info.condition = Condition::AL;
+      info.opcode = ARMDataOp::MOV;
+      info.immediate = false;
+      info.set_flags = false;
+      info.reg_dst = reg_dst;
+      info.op2_reg.reg = reg_src;
+      info.op2_reg.shift.type = Shift::LSL;
+      info.op2_reg.shift.immediate = true;
+      info.op2_reg.shift.amount_imm = 0;
+
+      return client.Handle(info);
     }
     case ThumbHighRegOp::BLX: {
-      return client.Handle(ARMBranchExchange{
-        .condition = Condition::AL,
-        .reg = reg_src,
-        .link = high1 != 0
-      });
+      auto info = ARMBranchExchange{};
+
+      info.condition = Condition::AL;
+      info.reg = reg_src;
+      info.link = high1 != 0;
+
+      return client.Handle(info);
     }
   }
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_relative_pc(u16 opcode, T& client) -> U {
-  return client.Handle(ARMSingleDataTransfer{
-    .condition = Condition::AL,
-    .immediate = true,
-    .pre_increment = true,
-    .add = true,
-    .byte = false,
-    .writeback = false,
-    .load = true,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3),
-    .reg_base = GPR::PC,
-    .offset_imm = u32(bit::get_field(opcode, 0, 8) * sizeof(u32))
-  });
+  auto info = ARMSingleDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.immediate = true;
+  info.pre_increment = true;
+  info.add = true;
+  info.byte = false;
+  info.writeback = false;
+  info.load = true;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
+  info.reg_base = GPR::PC;
+  info.offset_imm = u32(bit::get_field(opcode, 0, 8) * sizeof(u32));
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_store_offset_reg(u16 opcode, T& client) -> U {
-  return client.Handle(ARMSingleDataTransfer{
-    .condition = Condition::AL,
-    .immediate = false,
-    .pre_increment = true,
-    .add = true,
-    .byte = bit::get_bit<u16, bool>(opcode, 10),
-    .writeback = false,
-    .load = bit::get_bit<u16, bool>(opcode, 11),
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .reg_base = bit::get_field<u16, GPR>(opcode, 3, 3),
-    .offset_reg = {
-      .reg = bit::get_field<u16, GPR>(opcode, 6, 3),
-      .shift = Shift::LSL,
-      .amount = 0
-    }
-  });
+  auto info = ARMSingleDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.immediate = false;
+  info.pre_increment = true;
+  info.add = true;
+  info.byte = bit::get_bit<u16, bool>(opcode, 10);
+  info.writeback = false;
+  info.load = bit::get_bit<u16, bool>(opcode, 11);
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
+  info.offset_reg.reg = bit::get_field<u16, GPR>(opcode, 6, 3);
+  info.offset_reg.shift = Shift::LSL;
+  info.offset_reg.amount = 0;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_store_signed(u16 opcode, T& client) -> U {
-  auto op = 0;
-  auto load = false;
+  auto info = ARMHalfwordSignedTransfer{};
 
-  // TODO: rework this mess, ugh.
+  info.condition = Condition::AL;
+  info.pre_increment = true;
+  info.add = true;
+  info.immediate = false;
+  info.writeback = false;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
+  info.offset_reg = bit::get_field<u16, GPR>(opcode, 6, 3);
+
   switch (bit::get_field(opcode, 10, 2)) {
     case 0b00: {
       // STRH
-      op = 1;
-      load = false;
+      info.opcode = 1;
+      info.load = false;
       break;
     }
     case 0b01: {
       // LDRSB
-      op = 2;
-      load = true;
+      info.opcode = 2;
+      info.load = true;
       break;
     }
     case 0b10: {
       // LDRH
-      op = 1;
-      load = true;
+      info.opcode = 1;
+      info.load = true;
       break;
     }
     case 0b11: {
       // LDRSH
-      op = 3;
-      load = true;
+      info.opcode = 3;
+      info.load = true;
       break;
     }
   }
 
-  return client.Handle(ARMHalfwordSignedTransfer{
-    .condition = Condition::AL,
-    .pre_increment = true,
-    .add = true,
-    .immediate = false,
-    .writeback = false,
-    .load = load,
-    .opcode = op,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .reg_base = bit::get_field<u16, GPR>(opcode, 3, 3),
-    .offset_reg = bit::get_field<u16, GPR>(opcode, 6, 3)
-  });
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -362,83 +355,89 @@ inline auto decode_load_store_offset_imm(u16 opcode, T& client) -> U {
 
   if (!byte) offset <<= 2;
 
-  return client.Handle(ARMSingleDataTransfer{
-    .condition = Condition::AL,
-    .immediate = true,
-    .pre_increment = true,
-    .add = true,
-    .byte = byte,
-    .writeback = false,
-    .load = bit::get_bit<u16, bool>(opcode, 11),
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .reg_base = bit::get_field<u16, GPR>(opcode, 3, 3),
-    .offset_imm = offset
-  });
+  auto info = ARMSingleDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.immediate = true;
+  info.pre_increment = true;
+  info.add = true;
+  info.byte = byte;
+  info.writeback = false;
+  info.load = bit::get_bit<u16, bool>(opcode, 11);
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
+  info.offset_imm = offset;
+  
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_store_half(u16 opcode, T& client) -> U {
-  return client.Handle(ARMHalfwordSignedTransfer{
-    .condition = Condition::AL,
-    .pre_increment = true,
-    .add = true,
-    .immediate = true,
-    .writeback = false,
-    .load = bit::get_bit<u16, bool>(opcode, 11),
-    .opcode = 1,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3),
-    .reg_base = bit::get_field<u16, GPR>(opcode, 3, 3),
-    .offset_imm = u32(bit::get_field(opcode, 6, 5) << 1)
-  });
+  auto info = ARMHalfwordSignedTransfer{};
+
+  info.condition = Condition::AL;
+  info.pre_increment = true;
+  info.add = true;
+  info.immediate = true;
+  info.writeback = false;
+  info.load = bit::get_bit<u16, bool>(opcode, 11);
+  info.opcode = 1;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
+  info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
+  info.offset_imm = u32(bit::get_field(opcode, 6, 5) << 1);
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_store_relative_sp(u16 opcode, T& client) -> U {
-  return client.Handle(ARMSingleDataTransfer{
-    .condition = Condition::AL,
-    .immediate = true,
-    .pre_increment = true,
-    .add = true,
-    .byte = false,
-    .writeback = false,
-    .load = bit::get_bit<u16, bool>(opcode, 11),
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3),
-    .reg_base = GPR::SP,
-    .offset_imm = u32(bit::get_field(opcode, 0, 8) << 2)
-  });
+  auto info = ARMSingleDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.immediate = true;
+  info.pre_increment = true;
+  info.add = true;
+  info.byte = false;
+  info.writeback = false;
+  info.load = bit::get_bit<u16, bool>(opcode, 11);
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
+  info.reg_base = GPR::SP;
+  info.offset_imm = u32(bit::get_field(opcode, 0, 8) << 2);
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_load_address(u16 opcode, T& client) -> U {
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = ARMDataOp::ADD,
-    .immediate = true,
-    .set_flags = false,
-    .reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3),
-    .reg_op1 = bit::get_bit(opcode, 11) ? GPR::SP : GPR::PC,
-    .op2_imm = {
-      .value = u32(bit::get_field(opcode, 0, 8) << 2),
-      .shift = 0
-    },
-    .thumb_load_address = true
-  });
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = ARMDataOp::ADD;
+  info.immediate = true;
+  info.set_flags = false;
+  info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
+  info.reg_op1 = bit::get_bit(opcode, 11) ? GPR::SP : GPR::PC;
+  info.op2_imm.value = u32(bit::get_field(opcode, 0, 8) << 2);
+  info.op2_imm.shift = 0;
+  info.thumb_load_address = true;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_add_sp_offset(u16 opcode, T& client) -> U {
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = bit::get_bit(opcode, 7) ? ARMDataOp::SUB : ARMDataOp::ADD,
-    .immediate = true,
-    .set_flags = false,
-    .reg_dst = GPR::SP,
-    .reg_op1 = GPR::SP,
-    .op2_imm = {
-      .value = u32(bit::get_field(opcode, 0, 7) << 2),
-      .shift = 0
-    }
-  });
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = bit::get_bit(opcode, 7) ? ARMDataOp::SUB : ARMDataOp::ADD;
+  info.immediate = true;
+  info.set_flags = false;
+  info.reg_dst = GPR::SP;
+  info.reg_op1 = GPR::SP;
+  info.op2_imm.value = u32(bit::get_field(opcode, 0, 7) << 2);
+  info.op2_imm.shift = 0;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -450,16 +449,18 @@ inline auto decode_push_pop(u16 opcode, T& client) -> U {
     rlist |= (1 << (load ? 15 : 14));
   }
 
-  return client.Handle(ARMBlockDataTransfer{
-    .condition = Condition::AL,
-    .pre_increment = !load,
-    .add = load,
-    .user_mode = false,
-    .writeback = true,
-    .load = load,
-    .reg_base = GPR::SP,
-    .reg_list = rlist
-  });
+  auto info = ARMBlockDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.pre_increment = !load;
+  info.add = load;
+  info.user_mode = false;
+  info.writeback = true;
+  info.load = load;
+  info.reg_base = GPR::SP;
+  info.reg_list = rlist;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -473,76 +474,89 @@ inline auto decode_ldm_stm(u16 opcode, T& client) -> U {
     writeback = false;
   }
 
-  return client.Handle(ARMBlockDataTransfer{
-    .condition = Condition::AL,
-    .pre_increment = false,
-    .add = true,
-    .user_mode = false,
-    .writeback = writeback,
-    .load = load,
-    .reg_base = reg_base,
-    .reg_list = reg_list
-  });
+  auto info = ARMBlockDataTransfer{};
+
+  info.condition = Condition::AL;
+  info.pre_increment = false;
+  info.add = true;
+  info.user_mode = false;
+  info.writeback = writeback;
+  info.load = load;
+  info.reg_base = reg_base;
+  info.reg_list = reg_list;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_conditional_branch(u16 opcode, T& client) -> U {
+  // TODO: simplify this
   auto offset = (bit::get_field<u16, s32>(opcode, 0, 8) << 24) >> 23;
   auto condition = bit::get_field<u16, Condition>(opcode, 8, 4);
 
-  return client.Handle(ARMBranchRelative{
-    .condition = condition,
-    .offset = offset,
-    .link = false,
-    .exchange = false
-  });
+  auto info = ARMBranchRelative{};
+
+  info.condition = condition;
+  info.offset = offset;
+  info.link = false;
+  info.exchange = false;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_svc(u16 opcode, T& client) -> U {
-  return client.Handle(ARMException{
-    .condition = Condition::AL,
-    .exception = Exception::Supervisor,
-    .svc_comment = u32(bit::get_field(opcode, 0, 8) << 16)
-  });
+  auto info = ARMException{};
+
+  info.condition = Condition::AL;
+  info.exception = Exception::Supervisor;
+  info.svc_comment = u32(bit::get_field(opcode, 0, 8) << 16);
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_unconditional_branch(u16 opcode, T& client) -> U {
+  // TODO: simplify this
   auto offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 20;
 
-  return client.Handle(ARMBranchRelative{
-    .condition = Condition::AL,
-    .offset = offset,
-    .link = false,
-    .exchange = false
-  });
+  auto info = ARMBranchRelative{};
+
+  info.condition = Condition::AL;
+  info.offset = offset;
+  info.link = false;
+  info.exchange = false;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_branch_link_prefix(u16 opcode, T& client) -> U {
+  // TODO: simplify this
   auto offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 9;
 
-  return client.Handle(ARMDataProcessing{
-    .condition = Condition::AL,
-    .opcode = ARMDataOp::ADD,
-    .immediate = true,
-    .set_flags = false,
-    .reg_dst = GPR::LR,
-    .reg_op1 = GPR::PC,
-    .op2_imm = {
-      .value = u32(offset),
-      .shift = 0
-    }
-  });
+  auto info = ARMDataProcessing{};
+
+  info.condition = Condition::AL;
+  info.opcode = ARMDataOp::ADD;
+  info.immediate = true;
+  info.set_flags = false;
+  info.reg_dst = GPR::LR;
+  info.reg_op1 = GPR::PC;
+  info.op2_imm.value = u32(offset);
+  info.op2_imm.shift = 0;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_branch_link_suffix(u16 opcode, T& client, bool exchange) -> U {
-  return client.Handle(ThumbBranchLinkSuffix{
-    .offset = bit::get_field<u16, u32>(opcode, 0, 11) << 1,
-    .exchange = exchange
-  });
+  auto info = ThumbBranchLinkSuffix{};
+
+  info.offset = bit::get_field<u16, u32>(opcode, 0, 11) << 1;
+  info.exchange = exchange;
+
+  return client.Handle(info);
 }
 
 template<typename T, typename U = typename T::return_type>
@@ -551,12 +565,14 @@ inline auto decode_branch_link_full(u32 opcode, T& client) -> U {
 
   offset += (bit::get_field<u32, s32>(opcode, 0, 11) << 21) >> 9;
 
-  return client.Handle(ARMBranchRelative{
-    .condition = Condition::AL,
-    .offset = offset,
-    .link = true,
-    .exchange = !bit::get_bit<u32, bool>(opcode, 28)
-  });
+  auto info = ARMBranchRelative{};
+
+  info.condition = Condition::AL;
+  info.offset = offset;
+  info.link = true;
+  info.exchange = !bit::get_bit<u32, bool>(opcode, 28);
+
+  return client.Handle(info);
 }
 
 } // namespace lunatic::frontend::detail
