@@ -78,7 +78,6 @@ inline auto decode_data_processing(Condition condition, u32 opcode, T& client) -
   info.op2_reg.shift.amount_imm = bit::get_field(opcode, 7, 5);
   info.op2_imm.value = bit::get_field(opcode, 0, 8);
   info.op2_imm.shift = bit::get_field(opcode, 8, 4) * 2;
-
   return client.Handle(info);
 }
 
@@ -92,7 +91,6 @@ inline auto decode_move_status_register(Condition condition, u32 opcode, T& clie
   info.fsxc = bit::get_field<u32, int>(opcode, 16, 4);
   info.reg = bit::get_field<u32, GPR>(opcode, 0, 4);
   info.imm = bit::rotate_right(u32(u8(opcode)), bit::get_field(opcode, 8, 4) * 2);
-
   return client.Handle(info);
 }
 
@@ -103,7 +101,6 @@ inline auto decode_move_register_status(Condition condition, u32 opcode, T& clie
   info.condition = condition;
   info.spsr = bit::get_bit<u32, bool>(opcode, 22);
   info.reg = bit::get_field<u32, GPR>(opcode, 12, 4);
-
   return client.Handle(info);
 }
 
@@ -118,7 +115,6 @@ inline auto decode_multiply(Condition condition, u32 opcode, T& client) -> U {
   info.reg_op2 = bit::get_field<u32, GPR>(opcode,  8, 4);
   info.reg_op3 = bit::get_field<u32, GPR>(opcode, 12, 4);
   info.reg_dst = bit::get_field<u32, GPR>(opcode, 16, 4);
-
   return client.Handle(info);
 }
 
@@ -134,7 +130,6 @@ inline auto decode_multiply_long(Condition condition, u32 opcode, T& client) -> 
   info.reg_op2 = bit::get_field<u32, GPR>(opcode,  8, 4);
   info.reg_dst_lo = bit::get_field<u32, GPR>(opcode, 12, 4);
   info.reg_dst_hi = bit::get_field<u32, GPR>(opcode, 16, 4);
-
   return client.Handle(info);
 }
 
@@ -147,7 +142,6 @@ inline auto decode_single_data_swap(Condition condition, u32 opcode, T& client) 
   info.reg_src  = bit::get_field<u32, GPR>(opcode,  0, 4);
   info.reg_dst  = bit::get_field<u32, GPR>(opcode, 12, 4);
   info.reg_base = bit::get_field<u32, GPR>(opcode, 16, 4);
-
   return client.Handle(info);
 }
 
@@ -158,11 +152,9 @@ inline auto decode_branch_exchange(Condition condition, u32 opcode, T& client) -
   info.condition = condition;
   info.reg = bit::get_field<u32, GPR>(opcode, 0, 4);
   info.link = bit::get_bit<u32, bool>(opcode, 5);
-
   return client.Handle(info);
 }
 
-// TODO: the name of this instruction group is a misnormer...
 template<typename T, typename U = typename T::return_type>
 inline auto decode_halfword_signed_transfer(Condition condition, u32 opcode, T& client) -> U {
   auto info = ARMHalfwordSignedTransfer{};
@@ -178,7 +170,6 @@ inline auto decode_halfword_signed_transfer(Condition condition, u32 opcode, T& 
   info.reg_base = bit::get_field<u32, GPR>(opcode, 16, 4);
   info.offset_imm = (opcode & 0xF) | ((opcode >> 4) & 0xF0);
   info.offset_reg = bit::get_field<u32, GPR>(opcode, 0, 4);
-
   return client.Handle(info);
 }
 
@@ -199,7 +190,6 @@ inline auto decode_single_data_transfer(Condition condition, u32 opcode, T& clie
   info.offset_reg.reg = bit::get_field<u32, GPR>(opcode, 0, 4);
   info.offset_reg.shift = bit::get_field<u32, Shift>(opcode, 5, 2);
   info.offset_reg.amount = bit::get_field(opcode, 7, 5);
-
   return client.Handle(info);
 }
 
@@ -215,7 +205,6 @@ inline auto decode_block_data_transfer(Condition condition, u32 opcode, T& clien
   info.load = bit::get_bit<u32, bool>(opcode, 20);
   info.reg_base = bit::get_field<u32, GPR>(opcode, 16, 4);
   info.reg_list = bit::get_field<u32, u16>(opcode, 0, 16);
-
   return client.Handle(info);
 }
 
@@ -235,7 +224,6 @@ inline auto decode_branch_relative(Condition condition, u32 opcode, T& client) -
   info.offset = s32(offset);
   info.link = bit::get_bit<u32, bool>(opcode, 24);
   info.exchange = false;
-
   return client.Handle(info);
 }
 
@@ -251,7 +239,6 @@ inline auto decode_coprocessor_register_transfer(Condition condition, u32 opcode
   info.cn = bit::get_field(opcode, 16, 4);
   info.cm = bit::get_field(opcode, 0, 4);
   info.opcode2 = bit::get_field(opcode, 5, 3);
-
   return client.Handle(info);
 }
 
@@ -262,7 +249,6 @@ inline auto decode_svc(Condition condition, u32 opcode, T& client) -> U {
   info.condition = condition;
   info.exception = Exception::Supervisor;
   info.svc_comment = opcode & 0x00FFFFFF;
-
   return client.Handle(info);
 }
 
@@ -273,7 +259,6 @@ inline auto decode_count_leading_zeros(Condition condition, u32 opcode, T& clien
   info.condition = condition;
   info.reg_src = bit::get_field<u32, GPR>(opcode, 0, 4);
   info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
-
   return client.Handle(info);
 }
 
@@ -293,7 +278,6 @@ inline auto decode_saturating_add_sub(Condition condition, u32 opcode, T& client
   info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
   info.reg_lhs = bit::get_field<u32, GPR>(opcode, 0, 4);
   info.reg_rhs = bit::get_field<u32, GPR>(opcode, 16, 4);
-
   return client.Handle(info);
 }
 
@@ -322,7 +306,6 @@ inline auto decode_signed_halfword_multiply(Condition condition, u32 opcode, T& 
       info.reg_lhs = lhs;
       info.reg_rhs = rhs;
       info.reg_op3 = op3;
-
       return client.Handle(info);
     }
     case 0b1001: {
@@ -335,7 +318,6 @@ inline auto decode_signed_halfword_multiply(Condition condition, u32 opcode, T& 
       info.reg_lhs = lhs;
       info.reg_rhs = rhs;
       info.reg_op3 = op3;
-
       return client.Handle(info);
     }
     // SMLALxy
@@ -349,7 +331,6 @@ inline auto decode_signed_halfword_multiply(Condition condition, u32 opcode, T& 
       info.reg_dst_lo = op3;
       info.reg_lhs = lhs;
       info.reg_rhs = rhs;
-
       return client.Handle(info);
     }
   }
@@ -376,7 +357,6 @@ inline auto decode_branch_link_exchange_relative(u32 opcode, T& client) -> U {
   info.offset = s32(offset);
   info.link = true;
   info.exchange = true;
-
   return client.Handle(info);
 }
 
@@ -399,7 +379,6 @@ inline auto decode_arm(u32 instruction, T& client) -> U {
     return client.Undefined(instruction);
   }
 
-  // TODO: use string pattern based approach to decoding.
   switch (opcode >> 25) {
     case 0b000: {
       // Data processing immediate shift

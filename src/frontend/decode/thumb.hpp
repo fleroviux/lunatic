@@ -57,7 +57,6 @@ inline auto decode_move_shifted_register(u16 opcode, T& client) -> U {
   info.op2_reg.shift.type = bit::get_field<u16, Shift>(opcode, 11, 2);
   info.op2_reg.shift.immediate = true;
   info.op2_reg.shift.amount_imm = bit::get_field(opcode, 6, 5);
-
   return client.Handle(info);
 }
 
@@ -107,7 +106,6 @@ inline auto decode_mov_cmp_add_sub_imm(u16 opcode, T& client) -> U {
   info.reg_op1 = bit::get_field<u16, GPR>(opcode, 8, 3);
   info.op2_imm.value = bit::get_field<u16, u8>(opcode, 0, 8);
   info.op2_imm.shift = 0;
-
   return client.Handle(info);
 }
 
@@ -130,7 +128,6 @@ inline auto decode_alu(u16 opcode, T& client) -> U {
     info.op2_reg.shift.type = Shift::LSL;
     info.op2_reg.shift.immediate = true;
     info.op2_reg.shift.amount_imm = 0;
-
     return client.Handle(info);
   };
 
@@ -146,7 +143,6 @@ inline auto decode_alu(u16 opcode, T& client) -> U {
     info.op2_reg.shift.type = type;
     info.op2_reg.shift.immediate = false;
     info.op2_reg.shift.amount_reg = reg_src;
-
     return client.Handle(info);
   };
 
@@ -161,7 +157,6 @@ inline auto decode_alu(u16 opcode, T& client) -> U {
     info.reg_op1 = reg_src;
     info.op2_imm.value = 0;
     info.op2_imm.shift = 0;
-
     return client.Handle(info);
   };
 
@@ -174,7 +169,6 @@ inline auto decode_alu(u16 opcode, T& client) -> U {
     info.reg_op1 = reg_dst;
     info.reg_op2 = reg_src;
     info.reg_dst = reg_dst;
-
     return client.Handle(info);
   };
 
@@ -223,26 +217,22 @@ inline auto decode_high_register_ops(u16 opcode, T& client) -> U {
     case ThumbHighRegOp::ADD: {
       info_dp.opcode = ARMDataOp::ADD;
       info_dp.set_flags = false;
-
       return client.Handle(info_dp);
     }
     case ThumbHighRegOp::CMP: {
       info_dp.opcode = ARMDataOp::CMP;
       info_dp.set_flags = true;
-
       return client.Handle(info_dp);
     }
     case ThumbHighRegOp::MOV: {
       info_dp.opcode = ARMDataOp::MOV;
       info_dp.set_flags = false;
-
       return client.Handle(info_dp);
     }
     case ThumbHighRegOp::BLX: {
       info_bx.condition = Condition::AL;
       info_bx.reg = reg_src;
       info_bx.link = high1 != 0;
-
       return client.Handle(info_bx);
     }
   }
@@ -262,7 +252,6 @@ inline auto decode_load_relative_pc(u16 opcode, T& client) -> U {
   info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
   info.reg_base = GPR::PC;
   info.offset_imm = u32(bit::get_field(opcode, 0, 8) * sizeof(u32));
-
   return client.Handle(info);
 }
 
@@ -282,7 +271,6 @@ inline auto decode_load_store_offset_reg(u16 opcode, T& client) -> U {
   info.offset_reg.reg = bit::get_field<u16, GPR>(opcode, 6, 3);
   info.offset_reg.shift = Shift::LSL;
   info.offset_reg.amount = 0;
-
   return client.Handle(info);
 }
 
@@ -348,7 +336,6 @@ inline auto decode_load_store_offset_imm(u16 opcode, T& client) -> U {
   info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
   info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
   info.offset_imm = offset;
-  
   return client.Handle(info);
 }
 
@@ -366,7 +353,6 @@ inline auto decode_load_store_half(u16 opcode, T& client) -> U {
   info.reg_dst = bit::get_field<u16, GPR>(opcode, 0, 3);
   info.reg_base = bit::get_field<u16, GPR>(opcode, 3, 3);
   info.offset_imm = u32(bit::get_field(opcode, 6, 5) << 1);
-
   return client.Handle(info);
 }
 
@@ -384,7 +370,6 @@ inline auto decode_load_store_relative_sp(u16 opcode, T& client) -> U {
   info.reg_dst = bit::get_field<u16, GPR>(opcode, 8, 3);
   info.reg_base = GPR::SP;
   info.offset_imm = u32(bit::get_field(opcode, 0, 8) << 2);
-
   return client.Handle(info);
 }
 
@@ -401,7 +386,6 @@ inline auto decode_load_address(u16 opcode, T& client) -> U {
   info.op2_imm.value = u32(bit::get_field(opcode, 0, 8) << 2);
   info.op2_imm.shift = 0;
   info.thumb_load_address = true;
-
   return client.Handle(info);
 }
 
@@ -417,7 +401,6 @@ inline auto decode_add_sp_offset(u16 opcode, T& client) -> U {
   info.reg_op1 = GPR::SP;
   info.op2_imm.value = u32(bit::get_field(opcode, 0, 7) << 2);
   info.op2_imm.shift = 0;
-
   return client.Handle(info);
 }
 
@@ -440,7 +423,6 @@ inline auto decode_push_pop(u16 opcode, T& client) -> U {
   info.load = load;
   info.reg_base = GPR::SP;
   info.reg_list = rlist;
-
   return client.Handle(info);
 }
 
@@ -465,7 +447,6 @@ inline auto decode_ldm_stm(u16 opcode, T& client) -> U {
   info.load = load;
   info.reg_base = reg_base;
   info.reg_list = reg_list;
-
   return client.Handle(info);
 }
 
@@ -477,7 +458,6 @@ inline auto decode_conditional_branch(u16 opcode, T& client) -> U {
   info.offset = (bit::get_field<u16, s32>(opcode, 0, 8) << 24) >> 23;
   info.link = false;
   info.exchange = false;
-
   return client.Handle(info);
 }
 
@@ -488,7 +468,6 @@ inline auto decode_svc(u16 opcode, T& client) -> U {
   info.condition = Condition::AL;
   info.exception = Exception::Supervisor;
   info.svc_comment = u32(bit::get_field(opcode, 0, 8) << 16);
-
   return client.Handle(info);
 }
 
@@ -500,7 +479,6 @@ inline auto decode_unconditional_branch(u16 opcode, T& client) -> U {
   info.offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 20;
   info.link = false;
   info.exchange = false;
-
   return client.Handle(info);
 }
 
@@ -516,7 +494,6 @@ inline auto decode_branch_link_prefix(u16 opcode, T& client) -> U {
   info.reg_op1 = GPR::PC;
   info.op2_imm.value = u32((bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 9);
   info.op2_imm.shift = 0;
-
   return client.Handle(info);
 }
 
@@ -526,7 +503,6 @@ inline auto decode_branch_link_suffix(u16 opcode, T& client, bool exchange) -> U
 
   info.offset = bit::get_field<u16, u32>(opcode, 0, 11) << 1;
   info.exchange = exchange;
-
   return client.Handle(info);
 }
 
@@ -542,7 +518,6 @@ inline auto decode_branch_link_full(u32 opcode, T& client) -> U {
   info.offset = offset;
   info.link = true;
   info.exchange = !bit::get_bit<u32, bool>(opcode, 28);
-
   return client.Handle(info);
 }
 
@@ -572,7 +547,7 @@ inline auto decode_thumb(u32 opcode, T& client) -> U {
   if ((opcode & 0xF000) == 0xA000) return decode_load_address(opcode, client);
   if ((opcode & 0xFF00) == 0xB000) return decode_add_sp_offset(opcode, client);
   if ((opcode & 0xF600) == 0xB400) return decode_push_pop(opcode, client);
-//  if ((opcode & 0xFF00) == 0xBE00) return ThumbInstrType::SoftwareBreakpoint;
+//if ((opcode & 0xFF00) == 0xBE00) return ThumbInstrType::SoftwareBreakpoint;
   if ((opcode & 0xF000) == 0xC000) return decode_ldm_stm(opcode, client);
   if ((opcode & 0xFF00) <  0xDF00) return decode_conditional_branch(opcode, client);
   if ((opcode & 0xFF00) == 0xDF00) return decode_svc(opcode, client);
@@ -581,8 +556,7 @@ inline auto decode_thumb(u32 opcode, T& client) -> U {
   if ((opcode & 0xF800) == 0xF000) return decode_branch_link_prefix(opcode, client);
   if ((opcode & 0xF800) == 0xF800) return decode_branch_link_suffix(opcode, client, false);
 
-  // TODO: this is broken. can't distinguish between undefined ARM or Thumb opcode.
-  return client.Undefined(opcode);
+  return client.Undefined(opcode); // TODO: distinguish ARM and Thumb opcodes.
 }
 
 } // namespace lunatic::frontend
