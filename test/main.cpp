@@ -209,8 +209,7 @@ int main(int argc, char** argv) {
 
   // TODO: better initialization, set exception base for example.
   auto jit = CreateCPU(CPU::Descriptor{
-    .memory = g_memory,
-    .coprocessors = {
+    g_memory, {
       nullptr, nullptr, nullptr, nullptr,
       nullptr, nullptr, nullptr, nullptr,
       nullptr, nullptr, nullptr, nullptr,
