@@ -205,64 +205,45 @@ inline auto decode_high_register_ops(u16 opcode, T& client) -> U {
   auto high2 = bit::get_bit(opcode, 6) * 8;
   auto reg_dst = static_cast<GPR>(bit::get_field(opcode, 0, 3) | high1);
   auto reg_src = static_cast<GPR>(bit::get_field(opcode, 3, 3) | high2);
+  auto info_dp = ARMDataProcessing{};
+  auto info_bx = ARMBranchExchange{};
 
-  // TODO: this can be shortened a lot.
+  if (op != ThumbHighRegOp::BLX) {
+    info_dp.condition = Condition::AL;
+    info_dp.immediate = false;
+    info_dp.reg_dst = reg_dst;
+    info_dp.reg_op1 = reg_dst;
+    info_dp.op2_reg.reg = reg_src;
+    info_dp.op2_reg.shift.type = Shift::LSL;
+    info_dp.op2_reg.shift.immediate = true;
+    info_dp.op2_reg.shift.amount_imm = 0;
+  }
 
   switch (op) {
     case ThumbHighRegOp::ADD: {
-      auto info = ARMDataProcessing{};
+      info_dp.opcode = ARMDataOp::ADD;
+      info_dp.set_flags = false;
 
-      info.condition = Condition::AL;
-      info.opcode = ARMDataOp::ADD;
-      info.immediate = false;
-      info.set_flags = false;
-      info.reg_dst = reg_dst;
-      info.reg_op1 = reg_dst;
-      info.op2_reg.reg = reg_src;
-      info.op2_reg.shift.type = Shift::LSL;
-      info.op2_reg.shift.immediate = true;
-      info.op2_reg.shift.amount_imm = 0;
-
-      return client.Handle(info);
+      return client.Handle(info_dp);
     }
     case ThumbHighRegOp::CMP: {
-      auto info = ARMDataProcessing{};
+      info_dp.opcode = ARMDataOp::CMP;
+      info_dp.set_flags = true;
 
-      info.condition = Condition::AL;
-      info.opcode = ARMDataOp::CMP;
-      info.immediate = false;
-      info.set_flags = true;
-      info.reg_op1 = reg_dst;
-      info.op2_reg.reg = reg_src;
-      info.op2_reg.shift.type = Shift::LSL;
-      info.op2_reg.shift.immediate = true;
-      info.op2_reg.shift.amount_imm = 0;
-
-      return client.Handle(info);
+      return client.Handle(info_dp);
     }
     case ThumbHighRegOp::MOV: {
-      auto info = ARMDataProcessing{};
+      info_dp.opcode = ARMDataOp::MOV;
+      info_dp.set_flags = false;
 
-      info.condition = Condition::AL;
-      info.opcode = ARMDataOp::MOV;
-      info.immediate = false;
-      info.set_flags = false;
-      info.reg_dst = reg_dst;
-      info.op2_reg.reg = reg_src;
-      info.op2_reg.shift.type = Shift::LSL;
-      info.op2_reg.shift.immediate = true;
-      info.op2_reg.shift.amount_imm = 0;
-
-      return client.Handle(info);
+      return client.Handle(info_dp);
     }
     case ThumbHighRegOp::BLX: {
-      auto info = ARMBranchExchange{};
+      info_bx.condition = Condition::AL;
+      info_bx.reg = reg_src;
+      info_bx.link = high1 != 0;
 
-      info.condition = Condition::AL;
-      info.reg = reg_src;
-      info.link = high1 != 0;
-
-      return client.Handle(info);
+      return client.Handle(info_bx);
     }
   }
 }
@@ -490,14 +471,10 @@ inline auto decode_ldm_stm(u16 opcode, T& client) -> U {
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_conditional_branch(u16 opcode, T& client) -> U {
-  // TODO: simplify this
-  auto offset = (bit::get_field<u16, s32>(opcode, 0, 8) << 24) >> 23;
-  auto condition = bit::get_field<u16, Condition>(opcode, 8, 4);
-
   auto info = ARMBranchRelative{};
 
-  info.condition = condition;
-  info.offset = offset;
+  info.condition = bit::get_field<u16, Condition>(opcode, 8, 4);
+  info.offset = (bit::get_field<u16, s32>(opcode, 0, 8) << 24) >> 23;
   info.link = false;
   info.exchange = false;
 
@@ -517,13 +494,10 @@ inline auto decode_svc(u16 opcode, T& client) -> U {
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_unconditional_branch(u16 opcode, T& client) -> U {
-  // TODO: simplify this
-  auto offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 20;
-
   auto info = ARMBranchRelative{};
 
   info.condition = Condition::AL;
-  info.offset = offset;
+  info.offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 20;
   info.link = false;
   info.exchange = false;
 
@@ -532,9 +506,6 @@ inline auto decode_unconditional_branch(u16 opcode, T& client) -> U {
 
 template<typename T, typename U = typename T::return_type>
 inline auto decode_branch_link_prefix(u16 opcode, T& client) -> U {
-  // TODO: simplify this
-  auto offset = (bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 9;
-
   auto info = ARMDataProcessing{};
 
   info.condition = Condition::AL;
@@ -543,7 +514,7 @@ inline auto decode_branch_link_prefix(u16 opcode, T& client) -> U {
   info.set_flags = false;
   info.reg_dst = GPR::LR;
   info.reg_op1 = GPR::PC;
-  info.op2_imm.value = u32(offset);
+  info.op2_imm.value = u32((bit::get_field<u16, s32>(opcode, 0, 11) << 21) >> 9);
   info.op2_imm.shift = 0;
 
   return client.Handle(info);
@@ -582,8 +553,6 @@ inline auto decode_branch_link_full(u32 opcode, T& client) -> U {
 template<typename T, typename U = typename T::return_type>
 inline auto decode_thumb(u32 opcode, T& client) -> U {
   using namespace detail;
-
-  // TODO: use string pattern based approach to decoding.
 
   if ((opcode & 0xE800'F800) == 0xE800'F000) {
     return decode_branch_link_full(opcode, client);
