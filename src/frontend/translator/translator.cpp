@@ -41,9 +41,7 @@ void Translator::TranslateARM(BasicBlock& basic_block) {
 
   auto break_micro_block = [&](Condition condition) {
     add_micro_block();
-    micro_block = {
-      .condition = condition
-    };
+    micro_block = {condition};
     emitter = &micro_block.emitter;
   };
 
@@ -92,9 +90,7 @@ void Translator::TranslateARM(BasicBlock& basic_block) {
 }
 
 void Translator::TranslateThumb(BasicBlock& basic_block) {
-  auto micro_block = BasicBlock::MicroBlock{
-    .condition = Condition::AL
-  };
+  auto micro_block = BasicBlock::MicroBlock{Condition::AL};
 
   emitter = &micro_block.emitter;
 
@@ -120,9 +116,7 @@ void Translator::TranslateThumb(BasicBlock& basic_block) {
         micro_block.condition = condition;
       } else {
         add_micro_block();
-        micro_block = {
-          .condition = condition
-        };
+        micro_block = {condition};
         emitter = &micro_block.emitter;
       }
     }
