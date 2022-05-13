@@ -16,6 +16,10 @@ Translator::Translator(CPU::Descriptor const& descriptor)
     , exception_base(descriptor.exception_base)
     , memory(descriptor.memory)
     , coprocessors(descriptor.coprocessors) {
+  // TODO: properly handle this in the future.
+  if (descriptor.model == CPU::Descriptor::Model::ARM11MP) {
+    armv5te = true;
+  }
 }
 
 void Translator::Translate(BasicBlock& basic_block) {
