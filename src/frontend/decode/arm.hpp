@@ -19,15 +19,15 @@
 #include "definition/data_processing.hpp"
 #include "definition/exception.hpp"
 #include "definition/halfword_signed_transfer.hpp"
-#include "definition/multiply.hpp"
 #include "definition/multiply_long.hpp"
+#include "definition/multiply.hpp"
+#include "definition/parallel_add_sub.hpp"
 #include "definition/saturating_add_sub.hpp"
 #include "definition/signed_halfword_multiply.hpp"
 #include "definition/single_data_swap.hpp"
 #include "definition/single_data_transfer.hpp"
 #include "definition/status_transfer.hpp"
 #include "definition/thumb_bl_suffix.hpp"
-
 
 namespace lunatic {
 namespace frontend {
@@ -60,6 +60,7 @@ struct ARMDecodeClient {
   virtual auto Handle(ARMSignedWordHalfwordMultiply const& opcode) -> T = 0;
   virtual auto Handle(ARMSignedHalfwordMultiplyAccumulateLong const& opcode) -> T = 0;
   virtual auto Handle(ThumbBranchLinkSuffix const& opcode) -> T = 0;
+  virtual auto Handle(ARMParallelSignedAdd16 const& opcode) -> T = 0;
   virtual auto Undefined(u32 opcode) -> T = 0;
 };
 
@@ -342,8 +343,6 @@ inline auto decode_signed_halfword_multiply(Condition condition, u32 opcode, T& 
   return client.Undefined(opcode);
 }
 
-// unconditional opcodes:
-
 template<typename T, typename U = typename T::return_type>
 inline auto decode_branch_link_exchange_relative(u32 opcode, T& client) -> U {
   auto offset = opcode & 0xFFFFFF;
@@ -362,6 +361,27 @@ inline auto decode_branch_link_exchange_relative(u32 opcode, T& client) -> U {
   info.link = true;
   info.exchange = true;
   return client.Handle(info);
+}
+
+template<typename T, typename U = typename T::return_type>
+inline auto decode_media_instructions(Condition condition, u32 opcode, T& client) -> U {
+  auto op1 = bit::get_field<u32>(opcode, 20, 5);
+  auto op2 = bit::get_field<u32>(opcode, 5, 3);
+
+  if ((op1 & ~3) == 0) {
+    // Parallel addition and subtraction, signed
+    if ((op1 & 3) == 1 && op2 == 0) {
+      // SADD16
+      auto info = ARMParallelSignedAdd16{};
+      info.condition = condition;
+      info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
+      info.reg_lhs = bit::get_field<u32, GPR>(opcode, 16, 4);
+      info.reg_rhs = bit::get_field<u32, GPR>(opcode,  0, 4);
+      return {};
+    }
+  }
+
+  return client.Undefined(opcode);
 }
 
 } // namespace lunatic::frontend::detail
@@ -506,7 +526,9 @@ inline auto decode_arm(CPU::Descriptor::Model cpu_model, u32 instruction, T& cli
       // Media instructions
       // Architecturally Undefined
       if (opcode & 0x10) {
-        // return ARMInstrType::Media;
+        if (cpu_model == CPUModel::ARM11MP) {
+          return decode_media_instructions(condition, opcode, client);
+        }
         return client.Undefined(instruction);
       }
 
