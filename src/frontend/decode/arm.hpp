@@ -8,6 +8,7 @@
 #pragma once
 
 #include <lunatic/integer.hpp>
+#include <lunatic/cpu.hpp>
 
 #include "common/bit.hpp"
 #include "definition/block_data_transfer.hpp"
@@ -27,8 +28,11 @@
 #include "definition/status_transfer.hpp"
 #include "definition/thumb_bl_suffix.hpp"
 
+
 namespace lunatic {
 namespace frontend {
+
+using CPUModel = CPU::Descriptor::Model;
 
 /// Receives decoded opcode data
 template<typename T>
@@ -365,14 +369,13 @@ inline auto decode_branch_link_exchange_relative(u32 opcode, T& client) -> U {
 /// Decodes an ARM opcode into one of multiple structures,
 /// passes the resulting structure to a client and returns the client's return value.
 template<typename T, typename U = typename T::return_type>
-inline auto decode_arm(u32 instruction, T& client) -> U {
+inline auto decode_arm(CPU::Descriptor::Model cpu_model, u32 instruction, T& client) -> U {
   auto opcode = instruction & 0x0FFFFFFF;
   auto condition = bit::get_field<u32, Condition>(instruction, 28, 4);
 
   using namespace detail;
 
-  // TODO: do not decode unconditional opcodes on ARMv4T
-  if (condition == Condition::NV) {
+  if (cpu_model != CPUModel::ARM7 && condition == Condition::NV) {
     if (((instruction >> 25) & 7) == 5) {
       return decode_branch_link_exchange_relative(opcode, client);
     }
@@ -425,7 +428,6 @@ inline auto decode_arm(u32 instruction, T& client) -> U {
       } else if (!set_flags && opcode2 >= 0b1000 && opcode2 <= 0b1011) {
         // Miscellaneous instructions (A3-4)
         if ((opcode & 0xF0) == 0) {
-          // return ARMInstrType::StatusTransfer;
           if (bit::get_bit(opcode, 21)) {
             return decode_move_status_register(condition, opcode, client);
           }

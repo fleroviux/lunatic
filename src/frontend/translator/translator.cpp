@@ -14,6 +14,7 @@ Translator::Translator(CPU::Descriptor const& descriptor)
     : armv5te(descriptor.model == CPU::Descriptor::Model::ARM9)
     , max_block_size(descriptor.block_size)
     , exception_base(descriptor.exception_base)
+    , cpu_model(descriptor.model)
     , memory(descriptor.memory)
     , coprocessors(descriptor.coprocessors) {
   // TODO: properly handle this in the future.
@@ -67,7 +68,7 @@ void Translator::TranslateARM(BasicBlock& basic_block) {
       break_micro_block(condition);
     }
 
-    auto status = decode_arm(instruction, *this);
+    auto status = decode_arm(cpu_model, instruction, *this);
 
     if (status == Status::Unimplemented) {
       throw std::runtime_error(

@@ -72,6 +72,7 @@ private:
   bool armv5te;
   int  max_block_size;
   u32  exception_base;
+  CPU::Descriptor::Model cpu_model;
   Memory& memory;
   std::array<Coprocessor*, 16> coprocessors;
   IREmitter* emitter = nullptr;
