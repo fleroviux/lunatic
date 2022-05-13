@@ -78,6 +78,11 @@ struct IREmitter {
     IRVariable const& input
   );
 
+  void UpdateGE(
+    IRVariable const& result,
+    IRVariable const& input
+  );
+
   void LSL(
     IRVariable const& result,
     IRVariable const& operand,

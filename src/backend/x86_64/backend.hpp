@@ -82,6 +82,7 @@ private:
   void CompileSetCarry(CompileContext const& context, IRSetCarry* op);
   void CompileUpdateFlags(CompileContext const& context, IRUpdateFlags* op);
   void CompileUpdateSticky(CompileContext const& context, IRUpdateSticky* op);
+  void CompileUpdateGE(CompileContext const& context, IRUpdateGE* op);
   void CompileLSL(CompileContext const& context, IRLogicalShiftLeft* op);
   void CompileLSR(CompileContext const& context, IRLogicalShiftRight* op);
   void CompileASR(CompileContext const& context, IRArithmeticShiftRight* op);

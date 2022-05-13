@@ -28,6 +28,7 @@ enum class IROpcodeClass {
   SetCarry,
   UpdateFlags,
   UpdateSticky,
+  UpdateGE,
   LSL,
   LSR,
   ASR,
@@ -391,6 +392,40 @@ struct IRUpdateSticky final : IROpcodeBase<IROpcodeClass::UpdateSticky> {
   auto ToString() -> std::string override {
     return fmt::format(
       "update.q {}, {}",
+      std::to_string(result),
+      std::to_string(input)
+    );
+  }
+};
+
+struct IRUpdateGE final : IROpcodeBase<IROpcodeClass::UpdateGE> {
+  IRUpdateGE(
+    IRVariable const& result,
+    IRVariable const& input
+  )   : result(result), input(input) {}
+
+  IRVarRef result;
+  IRVarRef input;
+
+  auto Reads(IRVariable const& var) -> bool override {
+    return &input.Get() == &var;
+  }
+
+  auto Writes(IRVariable const& var) -> bool override {
+    return &result.Get() == &var;
+  }
+
+  void Repoint(
+    IRVariable const& var_old,
+    IRVariable const& var_new
+  ) override {
+    result.Repoint(var_old, var_new);
+    input.Repoint(var_old, var_new);
+  }
+
+  auto ToString() -> std::string override {
+    return fmt::format(
+      "update.ge {}, {}",
       std::to_string(result),
       std::to_string(input)
     );

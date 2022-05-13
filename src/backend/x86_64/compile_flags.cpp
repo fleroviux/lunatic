@@ -64,4 +64,22 @@ void X64Backend::CompileUpdateSticky(CompileContext const& context, IRUpdateStic
   code.or_(result_reg, input_reg);
 }
 
+void X64Backend::CompileUpdateGE(CompileContext const& context, IRUpdateGE* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
+  auto input_reg  = reg_alloc.GetVariableHostReg(op->input.Get());
+
+  auto temp0_reg = reg_alloc.GetTemporaryHostReg();
+  auto temp1_reg = reg_alloc.GetTemporaryHostReg();
+  code.mov(temp1_reg, 0b10000000'10000000'10000000'10000000);
+  code.movd(temp0_reg, xmm0);
+  code.pext(temp0_reg, temp0_reg, temp1_reg);
+  code.shl(temp0_reg, 16);
+
+  code.mov(result_reg, input_reg);
+  code.and_(result_reg, 0xFFF0FFFF);
+  code.or_(result_reg, temp0_reg);
+}
+
 } // namespace lunatic::backend

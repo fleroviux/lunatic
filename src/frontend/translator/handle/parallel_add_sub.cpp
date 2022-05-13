@@ -20,7 +20,9 @@ auto Translator::Handle(ARMParallelSignedAdd16 const& opcode) -> Status {
   emitter->SADD16(result, lhs, rhs);
   emitter->StoreGPR(IRGuestReg{opcode.reg_dst, mode}, result);
 
+  EmitUpdateGE();
   EmitAdvancePC();
+
   return Status::Continue;
 }
 

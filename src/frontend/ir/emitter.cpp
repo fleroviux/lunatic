@@ -115,6 +115,13 @@ void IREmitter::UpdateQ(
   Push<IRUpdateSticky>(result, input);
 }
 
+void IREmitter::UpdateGE(
+  IRVariable const& result,
+  IRVariable const& input
+) {
+  Push<IRUpdateGE>(result, input);
+}
+
 void IREmitter::LSL(
   IRVariable const& result,
   IRVariable const& operand,
@@ -379,7 +386,6 @@ void IREmitter::QSUB(
 ) {
   Push<IRSaturatingSub>(result, lhs, rhs);
 }
-
 
 void IREmitter::MRC(
   IRVariable const& result,
