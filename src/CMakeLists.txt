@@ -17,6 +17,7 @@ set(SOURCES
   backend/x86_64/compile_memory.cpp
   backend/x86_64/compile_multiply.cpp
   backend/x86_64/compile_shift.cpp
+  backend/x86_64/compile_simd.cpp
   backend/x86_64/register_allocator.cpp
   common/pool_allocator.cpp
   frontend/ir/emitter.cpp

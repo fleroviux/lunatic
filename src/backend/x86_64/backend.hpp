@@ -109,6 +109,7 @@ private:
   void CompileFlushExchange(CompileContext const& context, IRFlushExchange* op);
   void CompileMRC(CompileContext const& context, IRReadCoprocessorRegister* op);
   void CompileMCR(CompileContext const& context, IRWriteCoprocessorRegister* op);
+  void CompileSADD16(CompileContext const& context, IRSignedAdd16* op);
 
   Memory& memory;
   State& state;

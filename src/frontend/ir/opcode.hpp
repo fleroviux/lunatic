@@ -54,7 +54,8 @@ enum class IROpcodeClass {
   QADD,
   QSUB,
   MRC,
-  MCR
+  MCR,
+  SADD16
 };
 
 // TODO: Reads(), Writes() and ToString() should be const,
@@ -1277,6 +1278,47 @@ struct IRWriteCoprocessorRegister final : IROpcodeBase<IROpcodeClass::MCR> {
       cn,
       cm,
       opcode2
+    );
+  }
+};
+
+struct IRSignedAdd16 final : IROpcodeBase<IROpcodeClass::SADD16> {
+  IRSignedAdd16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  )   : result(result)
+      , lhs(lhs)
+      , rhs(rhs) {
+  }
+
+  IRVarRef result;
+  IRVarRef lhs;
+  IRVarRef rhs;
+
+  auto Reads(IRVariable const& var) -> bool override {
+    return &var == &lhs.Get() || &var == &rhs.Get();
+  }
+
+  auto Writes(IRVariable const& var) -> bool override {
+    return &var == &result.Get();
+  }
+
+  void Repoint(
+    IRVariable const& var_old,
+    IRVariable const& var_new
+  ) override {
+    result.Repoint(var_old, var_new);
+    lhs.Repoint(var_old, var_new);
+    rhs.Repoint(var_old, var_new);
+  }
+
+  auto ToString() -> std::string override {
+    return fmt::format(
+      "sadd16 {}, {}, {}",
+      std::to_string(result),
+      std::to_string(lhs),
+      std::to_string(rhs)
     );
   }
 };

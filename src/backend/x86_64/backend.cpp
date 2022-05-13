@@ -376,6 +376,9 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::MRC: CompileMRC(context, lunatic_cast<IRReadCoprocessorRegister>(op.get())); break;
     case IROpcodeClass::MCR: CompileMCR(context, lunatic_cast<IRWriteCoprocessorRegister>(op.get())); break;
 
+    // SIMD (media instructions)
+    case IROpcodeClass::SADD16: CompileSADD16(context, lunatic_cast<IRSignedAdd16>(op.get())); break;
+
     default: {
       throw std::runtime_error(
         fmt::format("lunatic: unhandled IR opcode: {}", op->ToString())

@@ -403,5 +403,13 @@ void IREmitter::MCR(
   Push<IRWriteCoprocessorRegister>(value, coprocessor_id, opcode1, cn, cm, opcode2);
 }
 
+void IREmitter::SADD16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRSignedAdd16>(result, lhs, rhs);
+}
+
 } // namespace lunatic::frontend
 } // namespace lunatic

@@ -377,7 +377,7 @@ inline auto decode_media_instructions(Condition condition, u32 opcode, T& client
       info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
       info.reg_lhs = bit::get_field<u32, GPR>(opcode, 16, 4);
       info.reg_rhs = bit::get_field<u32, GPR>(opcode,  0, 4);
-      return {};
+      return client.Handle(info);
     }
   }
 
