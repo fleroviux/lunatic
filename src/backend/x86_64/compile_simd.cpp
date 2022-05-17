@@ -55,4 +55,20 @@ void X64Backend::CompilePADDU16(CompileContext const& context, IRParallelAddU16*
   code.pcmpgtw(xmm0, xmm3);
 }
 
+void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
+    DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableHostReg(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableHostReg(op->rhs.Get());
+
+  // TODO: save and restore XMM regs.
+
+  code.movq(xmm1, lhs_reg.cvt64());
+  code.movq(xmm2, rhs_reg.cvt64());
+  code.movq(xmm3, xmm1);
+  code.paddsw(xmm3, xmm2);
+  code.movd(result_reg, xmm3);
+}
+
 } // namespace lunatic::backend
