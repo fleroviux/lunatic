@@ -58,7 +58,8 @@ enum class IROpcodeClass {
   MCR,
   PADDS16,
   PADDU16,
-  PQADDS16
+  PQADDS16,
+  PQADDU16
 };
 
 // TODO: Reads(), Writes() and ToString() should be const,
@@ -1384,6 +1385,14 @@ struct IRParallelSaturateAddS16 final : IRParallelAddSubBase<IROpcodeClass::PQAD
 
   auto ToString() -> std::string override {
     return IRParallelAddSubBase::ToString("qadd16");
+  }
+};
+
+struct IRParallelSaturateAddU16 final : IRParallelAddSubBase<IROpcodeClass::PQADDU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uqadd16");
   }
 };
 

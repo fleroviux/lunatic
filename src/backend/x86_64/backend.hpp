@@ -113,6 +113,7 @@ private:
   void CompilePADDS16(CompileContext const& context, IRParallelAddS16* op);
   void CompilePADDU16(CompileContext const& context, IRParallelAddU16* op);
   void CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op);
+  void CompilePQADDU16(CompileContext const& context, IRParallelSaturateAddU16* op);
 
   Memory& memory;
   State& state;

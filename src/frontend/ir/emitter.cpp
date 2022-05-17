@@ -433,5 +433,13 @@ void IREmitter::PQADDS16(
   Push<IRParallelSaturateAddS16>(result, lhs, rhs);
 }
 
+void IREmitter::PQADDU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateAddU16>(result, lhs, rhs);
+}
+
 } // namespace lunatic::frontend
 } // namespace lunatic

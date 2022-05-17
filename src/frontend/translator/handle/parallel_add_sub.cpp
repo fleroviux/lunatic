@@ -21,9 +21,10 @@ auto Translator::Handle(ARMParallelAddSub const& opcode) -> Status {
   emitter->LoadGPR(IRGuestReg{opcode.reg_rhs, mode}, rhs);
 
   switch (opcode.opcode) {
-    case Op::SADD16: emitter->PADDS16(result, lhs, rhs); break;
-    case Op::QADD16: emitter->PQADDS16(result, lhs, rhs); break;
-    case Op::UADD16: emitter->PADDU16(result, lhs, rhs); break;
+    case Op::SADD16:  emitter->PADDS16 (result, lhs, rhs); break;
+    case Op::QADD16:  emitter->PQADDS16(result, lhs, rhs); break;
+    case Op::UADD16:  emitter->PADDU16 (result, lhs, rhs); break;
+    case Op::UQADD16: emitter->PQADDU16(result, lhs, rhs); break;
   }
 
   emitter->StoreGPR(IRGuestReg{opcode.reg_dst, mode}, result);
