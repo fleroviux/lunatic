@@ -20,24 +20,16 @@ void X64Backend::CompileSADD16(CompileContext const& context, IRSignedAdd16* op)
 
   code.movq(xmm1, lhs_reg.cvt64());
   code.movq(xmm2, rhs_reg.cvt64());
-  code.movq(xmm3, xmm2);
-  code.paddw(xmm3, xmm1);
+  code.movq(xmm3, xmm1);
+  code.paddw(xmm3, xmm2);
   code.movd(result_reg, xmm3);
 
+  // Calculate GE flags to XMM0
   code.movq(xmm0, xmm1);
-  code.pxor(xmm0, xmm2);
-  code.pxor(xmm2, xmm3);
-  code.pandn(xmm0, xmm2);
-  code.pxor(xmm0, xmm3);
+  code.paddsw(xmm0, xmm2);
   code.psraw(xmm0, 15);
-  code.pcmpeqb(xmm1, xmm1); // FFFFFFFFFFFFFFFF
-  code.pxor(xmm0, xmm1);
-
-  // // Flag test
-  // code.push(rcx);
-  // code.mov(ecx, 0x80008000);
-  // code.movd(xmm0, ecx);
-  // code.pop(rcx);
+  code.pxor(xmm1, xmm1);
+  code.pcmpeqw(xmm0, xmm1);
 }
 
 } // namespace lunatic::backend
