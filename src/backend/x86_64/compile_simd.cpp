@@ -27,9 +27,8 @@ void X64Backend::CompileSADD16(CompileContext const& context, IRSignedAdd16* op)
   // Calculate GE flags to XMM0
   code.movq(xmm0, xmm1);
   code.paddsw(xmm0, xmm2);
-  code.psraw(xmm0, 15);
-  code.pxor(xmm1, xmm1);
-  code.pcmpeqw(xmm0, xmm1);
+  code.pcmpeqw(xmm1, xmm1);
+  code.pcmpgtw(xmm0, xmm1);
 }
 
 } // namespace lunatic::backend
