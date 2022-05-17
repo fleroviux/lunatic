@@ -56,7 +56,8 @@ enum class IROpcodeClass {
   QSUB,
   MRC,
   MCR,
-  SADD16
+  PADDS16,
+  PADDU16
 };
 
 // TODO: Reads(), Writes() and ToString() should be const,
@@ -1317,8 +1318,9 @@ struct IRWriteCoprocessorRegister final : IROpcodeBase<IROpcodeClass::MCR> {
   }
 };
 
-struct IRSignedAdd16 final : IROpcodeBase<IROpcodeClass::SADD16> {
-  IRSignedAdd16(
+template<IROpcodeClass _klass>
+struct IRParallelAddSubBase : IROpcodeBase<_klass> {
+  IRParallelAddSubBase(
     IRVariable const& result,
     IRVariable const& lhs,
     IRVariable const& rhs
@@ -1348,13 +1350,31 @@ struct IRSignedAdd16 final : IROpcodeBase<IROpcodeClass::SADD16> {
     rhs.Repoint(var_old, var_new);
   }
 
-  auto ToString() -> std::string override {
+protected:
+  auto ToString(const char* mnemonic) -> std::string {
     return fmt::format(
-      "sadd16 {}, {}, {}",
+      "{} {}, {}, {}",
+      mnemonic,
       std::to_string(result),
       std::to_string(lhs),
       std::to_string(rhs)
     );
+  }
+};
+
+struct IRParallelAddS16 final : IRParallelAddSubBase<IROpcodeClass::PADDS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("sadd16");
+  }
+};
+
+struct IRParallelAddU16 final : IRParallelAddSubBase<IROpcodeClass::PADDU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uadd16");
   }
 };
 

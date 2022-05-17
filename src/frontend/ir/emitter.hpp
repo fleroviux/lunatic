@@ -271,7 +271,13 @@ struct IREmitter {
     int opcode2
   );
 
-  void SADD16(
+  void PADDS16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
+  void PADDU16(
     IRVariable const& result,
     IRVariable const& lhs,
     IRVariable const& rhs
