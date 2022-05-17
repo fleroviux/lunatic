@@ -60,7 +60,7 @@ struct ARMDecodeClient {
   virtual auto Handle(ARMSignedWordHalfwordMultiply const& opcode) -> T = 0;
   virtual auto Handle(ARMSignedHalfwordMultiplyAccumulateLong const& opcode) -> T = 0;
   virtual auto Handle(ThumbBranchLinkSuffix const& opcode) -> T = 0;
-  virtual auto Handle(ARMParallelSignedAdd16 const& opcode) -> T = 0;
+  virtual auto Handle(ARMParallelAddSub const& opcode) -> T = 0;
   virtual auto Undefined(u32 opcode) -> T = 0;
 };
 
@@ -368,17 +368,14 @@ inline auto decode_media_instructions(Condition condition, u32 opcode, T& client
   auto op1 = bit::get_field<u32>(opcode, 20, 5);
   auto op2 = bit::get_field<u32>(opcode, 5, 3);
 
-  if ((op1 & ~3) == 0) {
-    // Parallel addition and subtraction, signed
-    if ((op1 & 3) == 1 && op2 == 0) {
-      // SADD16
-      auto info = ARMParallelSignedAdd16{};
-      info.condition = condition;
-      info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
-      info.reg_lhs = bit::get_field<u32, GPR>(opcode, 16, 4);
-      info.reg_rhs = bit::get_field<u32, GPR>(opcode,  0, 4);
-      return client.Handle(info);
-    }
+  if ((op1 & ~7) == 0) {
+    auto info = ARMParallelAddSub{};
+    info.condition = condition;
+    info.opcode = static_cast<ARMParallelAddSub::Opcode>(((op1 & 7) << 3) | op2);
+    info.reg_dst = bit::get_field<u32, GPR>(opcode, 12, 4);
+    info.reg_lhs = bit::get_field<u32, GPR>(opcode, 16, 4);
+    info.reg_rhs = bit::get_field<u32, GPR>(opcode,  0, 4);
+    return client.Handle(info);
   }
 
   return client.Undefined(opcode);
