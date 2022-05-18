@@ -57,6 +57,14 @@ struct X64RegisterAllocator {
   auto GetScratchGPR() -> Xbyak::Reg32;
 
   /**
+   * Get a scratch host XMM register for use during the current opcode.
+   * The host XMM register will be automatically released after the current opcode.
+   * 
+   * @returns the host XMM register
+   */
+  auto GetScratchXMM() -> Xbyak::Xmm;
+
+  /**
    * If var_old will be released after the current opcode,
    * then it will be released early and the host GPR
    * allocated to it will be moved to var_new.
@@ -83,7 +91,7 @@ private:
   void ReleaseTemporaryHostRegs();
 
   /**
-   * Find and allocate a host register that is currently unused.
+   * Find and allocate a host GPR that is currently unused.
    * If no register is free attempt to spill a variable to the stack to
    * free its register up.
    *
@@ -91,11 +99,21 @@ private:
    */
   auto FindFreeGPR() -> Xbyak::Reg32;
 
+  /**
+   * Find and allocate a host XMM register that is currently unused.
+   *
+   * @returns the host XMM register
+   */
+  auto FindFreeXMM() -> Xbyak::Xmm;
+
   IREmitter const& emitter;
   Xbyak::CodeGenerator& code;
 
   /// Host GPRs that are free and can be allocated.
   std::vector<Xbyak::Reg32> free_host_gprs;
+
+  // Host XMM regs that are free and can be allocated.
+  std::vector<Xbyak::Xmm> free_host_xmms;
 
   /// Map variable to its allocated host GPR (if any).
   std::vector<Optional<Xbyak::Reg32>> var_id_to_host_gpr;
@@ -109,8 +127,11 @@ private:
   /// Map variable to the slot it was spilled to (if it is spilled).  
   std::vector<Optional<int>> var_id_to_spill_slot;
 
-  /// Array of currently allocated scratch registers.
+  /// Array of currently allocated scratch GPRs.
   std::vector<Xbyak::Reg32> temp_host_gprs;
+
+  /// Array of currently allocated scratch XMM registers.
+  std::vector<Xbyak::Xmm> temp_host_xmms;
 
   /// The current IR program location.
   int location = 0;

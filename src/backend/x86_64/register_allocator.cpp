@@ -38,6 +38,18 @@ X64RegisterAllocator::X64RegisterAllocator(
     r15d
   };
 
+  // XMM0 is statically allocated for GE flags.
+  // TODO: use XMM8 to XMM31 when available.
+  free_host_xmms = {
+    xmm1,
+    xmm2,
+    xmm3,
+    xmm4,
+    xmm5,
+    xmm6,
+    xmm7
+  };
+
   auto number_of_vars = emitter.Vars().size();
   var_id_to_host_gpr.resize(number_of_vars);
   var_id_to_point_of_last_use.resize(number_of_vars);
@@ -84,6 +96,12 @@ auto X64RegisterAllocator::GetVariableGPR(IRVariable const& var) -> Xbyak::Reg32
 auto X64RegisterAllocator::GetScratchGPR() -> Xbyak::Reg32 {
   auto reg = FindFreeGPR();
   temp_host_gprs.push_back(reg);
+  return reg;
+}
+
+auto X64RegisterAllocator::GetScratchXMM() -> Xbyak::Xmm {
+  auto reg = FindFreeXMM();
+  temp_host_xmms.push_back(reg);
   return reg;
 }
 
@@ -151,7 +169,13 @@ void X64RegisterAllocator::ReleaseTemporaryHostRegs() {
   for (auto reg : temp_host_gprs) {
     free_host_gprs.push_back(reg);
   }
+
+  for (auto reg : temp_host_xmms) {
+    free_host_xmms.push_back(reg);
+  }
+
   temp_host_gprs.clear();
+  temp_host_xmms.clear();
 }
 
 auto X64RegisterAllocator::FindFreeGPR() -> Xbyak::Reg32 {
@@ -188,7 +212,17 @@ auto X64RegisterAllocator::FindFreeGPR() -> Xbyak::Reg32 {
     }
   }
 
-  throw std::runtime_error("X64RegisterAllocator: out of registers and spill space.");
+  throw std::runtime_error("X64RegisterAllocator: out of GPRs and spill space.");
+}
+
+auto X64RegisterAllocator::FindFreeXMM() -> Xbyak::Xmm {
+  if (free_host_xmms.size() != 0) {
+    auto reg = free_host_xmms.back();
+    free_host_xmms.pop_back();
+    return reg;
+  }
+
+  throw std::runtime_error("X64RegisterAllocator: out of XMM registers.");
 }
 
 } // namespace lunatic::backend
