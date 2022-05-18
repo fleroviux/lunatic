@@ -12,8 +12,8 @@ namespace lunatic::backend {
 void X64Backend::CompileMemoryRead(CompileContext const& context, IRMemoryRead* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto address_reg = reg_alloc.GetVariableHostReg(op->address.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto address_reg = reg_alloc.GetVariableGPR(op->address.Get());
   auto flags = op->flags;
 
   auto label_slowmem = Xbyak::Label{};
@@ -28,7 +28,7 @@ void X64Backend::CompileMemoryRead(CompileContext const& context, IRMemoryRead* 
   auto itcm_reg = Xbyak::Reg64{};
 
   if (itcm.data != nullptr || dtcm.data != nullptr) {
-    itcm_reg = reg_alloc.GetTemporaryHostReg().cvt64();
+    itcm_reg = reg_alloc.GetScratchGPR().cvt64();
   }
 
   // TODO: deduplicate and clean this up in general.
@@ -252,9 +252,9 @@ void X64Backend::CompileMemoryRead(CompileContext const& context, IRMemoryRead* 
 void X64Backend::CompileMemoryWrite(CompileContext const& context, IRMemoryWrite* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto source_reg  = reg_alloc.GetVariableHostReg(op->source.Get());
-  auto address_reg = reg_alloc.GetVariableHostReg(op->address.Get());
-  auto scratch_reg = reg_alloc.GetTemporaryHostReg();
+  auto source_reg  = reg_alloc.GetVariableGPR(op->source.Get());
+  auto address_reg = reg_alloc.GetVariableGPR(op->address.Get());
+  auto scratch_reg = reg_alloc.GetScratchGPR();
   auto flags = op->flags;
 
   auto label_slowmem = Xbyak::Label{};
@@ -269,7 +269,7 @@ void X64Backend::CompileMemoryWrite(CompileContext const& context, IRMemoryWrite
   auto itcm_reg = Xbyak::Reg64{};
 
   if (itcm.data != nullptr || dtcm.data != nullptr) {
-    itcm_reg = reg_alloc.GetTemporaryHostReg().cvt64();
+    itcm_reg = reg_alloc.GetScratchGPR().cvt64();
   }
 
   // TODO: deduplicate and clean this up in general.

@@ -24,7 +24,7 @@ X64RegisterAllocator::X64RegisterAllocator(
   //   - rbx: number of cycles left
   //   - rcx: pointer to guest state (lunatic::frontend::State)
   //   - rbp: pointer to stack frame / spill area.
-  free_host_regs = {
+  free_host_gprs = {
     edx,
     esi,
     edi,
@@ -39,7 +39,7 @@ X64RegisterAllocator::X64RegisterAllocator(
   };
 
   auto number_of_vars = emitter.Vars().size();
-  var_id_to_host_reg.resize(number_of_vars);
+  var_id_to_host_gpr.resize(number_of_vars);
   var_id_to_point_of_last_use.resize(number_of_vars);
   var_id_to_spill_slot.resize(number_of_vars);
 
@@ -59,14 +59,14 @@ void X64RegisterAllocator::AdvanceLocation() {
   ReleaseTemporaryHostRegs();
 }
 
-auto X64RegisterAllocator::GetVariableHostReg(IRVariable const& var) -> Xbyak::Reg32 {
+auto X64RegisterAllocator::GetVariableGPR(IRVariable const& var) -> Xbyak::Reg32 {
   // Check if the variable is already allocated to a register at the moment.
-  auto maybe_reg = var_id_to_host_reg[var.id];
+  auto maybe_reg = var_id_to_host_gpr[var.id];
   if (maybe_reg.HasValue()) {
     return maybe_reg.Unwrap();
   }
 
-  auto reg = FindFreeHostReg();
+  auto reg = FindFreeGPR();
 
   // If the variable was spilled previously then restore its previous value.
   auto maybe_spill = var_id_to_spill_slot[var.id];
@@ -77,39 +77,39 @@ auto X64RegisterAllocator::GetVariableHostReg(IRVariable const& var) -> Xbyak::R
     var_id_to_spill_slot[var.id] = {};
   }
 
-  var_id_to_host_reg[var.id] = reg;
+  var_id_to_host_gpr[var.id] = reg;
   return reg;
 }
 
-auto X64RegisterAllocator::GetTemporaryHostReg() -> Xbyak::Reg32 {
-  auto reg = FindFreeHostReg();
-  temp_host_regs.push_back(reg);
+auto X64RegisterAllocator::GetScratchGPR() -> Xbyak::Reg32 {
+  auto reg = FindFreeGPR();
+  temp_host_gprs.push_back(reg);
   return reg;
 }
 
-void X64RegisterAllocator::ReleaseVarAndReuseHostReg(
+void X64RegisterAllocator::ReleaseVarAndReuseGPR(
   IRVariable const& var_old,
   IRVariable const& var_new
 ) {
-  if (var_id_to_host_reg[var_new.id].HasValue()) {
+  if (var_id_to_host_gpr[var_new.id].HasValue()) {
     return;
   }
 
   auto point_of_last_use = var_id_to_point_of_last_use[var_old.id];
 
   if (point_of_last_use == location) {
-    auto maybe_reg = var_id_to_host_reg[var_old.id];
+    auto maybe_reg = var_id_to_host_gpr[var_old.id];
 
     if (maybe_reg.HasValue()) {
-      var_id_to_host_reg[var_new.id] = maybe_reg;
-      var_id_to_host_reg[var_old.id] = {};
+      var_id_to_host_gpr[var_new.id] = maybe_reg;
+      var_id_to_host_gpr[var_old.id] = {};
     }
   }
 }
 
-bool X64RegisterAllocator::IsHostRegFree(Xbyak::Reg64 reg) const {
-  auto begin = free_host_regs.begin();
-  auto end = free_host_regs.end();
+bool X64RegisterAllocator::IsGPRFree(Xbyak::Reg64 reg) const {
+  auto begin = free_host_gprs.begin();
+  auto end = free_host_gprs.end();
 
   return std::find(begin, end, reg.cvt32()) != end;
 }
@@ -138,26 +138,26 @@ void X64RegisterAllocator::ReleaseDeadVariables() {
     auto point_of_last_use = var_id_to_point_of_last_use[var->id];
 
     if (location > point_of_last_use) {
-      auto maybe_reg = var_id_to_host_reg[var->id];
+      auto maybe_reg = var_id_to_host_gpr[var->id];
       if (maybe_reg.HasValue()) {
-        free_host_regs.push_back(maybe_reg.Unwrap());
-        var_id_to_host_reg[var->id] = {};
+        free_host_gprs.push_back(maybe_reg.Unwrap());
+        var_id_to_host_gpr[var->id] = {};
       }
     }
   }
 }
 
 void X64RegisterAllocator::ReleaseTemporaryHostRegs() {
-  for (auto reg : temp_host_regs) {
-    free_host_regs.push_back(reg);
+  for (auto reg : temp_host_gprs) {
+    free_host_gprs.push_back(reg);
   }
-  temp_host_regs.clear();
+  temp_host_gprs.clear();
 }
 
-auto X64RegisterAllocator::FindFreeHostReg() -> Xbyak::Reg32 {
-  if (free_host_regs.size() != 0) {
-    auto reg = free_host_regs.back();
-    free_host_regs.pop_back();
+auto X64RegisterAllocator::FindFreeGPR() -> Xbyak::Reg32 {
+  if (free_host_gprs.size() != 0) {
+    auto reg = free_host_gprs.back();
+    free_host_gprs.pop_back();
     return reg;
   }
 
@@ -166,15 +166,15 @@ auto X64RegisterAllocator::FindFreeHostReg() -> Xbyak::Reg32 {
   // Find a variable to be spilled and deallocate it.
   // TODO: think of a smart way to pick which variable/register to spill.
   for (auto const& var : emitter.Vars()) {
-    if (var_id_to_host_reg[var->id].HasValue()) {
+    if (var_id_to_host_gpr[var->id].HasValue()) {
       // Make sure the variable that we spill is not currently used.
       if (current_op->Reads(*var) || current_op->Writes(*var)) {
         continue;
       }
 
-      auto reg = var_id_to_host_reg[var->id].Unwrap();
+      auto reg = var_id_to_host_gpr[var->id].Unwrap();
 
-      var_id_to_host_reg[var->id] = {};
+      var_id_to_host_gpr[var->id] = {};
 
       // Spill the variable into one of the free slots.
       for (int slot = 0; slot < kSpillAreaSize; slot++) {

@@ -12,9 +12,9 @@ namespace lunatic::backend {
 void X64Backend::CompilePADDS16(CompileContext const& context, IRParallelAddS16* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto lhs_reg = reg_alloc.GetVariableHostReg(op->lhs.Get());
-  auto rhs_reg = reg_alloc.GetVariableHostReg(op->rhs.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableGPR(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableGPR(op->rhs.Get());
   
   // TODO: save and restore XMM regs.
 
@@ -34,9 +34,9 @@ void X64Backend::CompilePADDS16(CompileContext const& context, IRParallelAddS16*
 void X64Backend::CompilePADDU16(CompileContext const& context, IRParallelAddU16* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto lhs_reg = reg_alloc.GetVariableHostReg(op->lhs.Get());
-  auto rhs_reg = reg_alloc.GetVariableHostReg(op->rhs.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableGPR(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableGPR(op->rhs.Get());
 
   // TODO: save and restore XMM regs.
 
@@ -58,9 +58,9 @@ void X64Backend::CompilePADDU16(CompileContext const& context, IRParallelAddU16*
 void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto lhs_reg = reg_alloc.GetVariableHostReg(op->lhs.Get());
-  auto rhs_reg = reg_alloc.GetVariableHostReg(op->rhs.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableGPR(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableGPR(op->rhs.Get());
 
   // TODO: save and restore XMM regs.
 
@@ -74,9 +74,9 @@ void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSatura
 void X64Backend::CompilePQADDU16(CompileContext const& context, IRParallelSaturateAddU16* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto lhs_reg = reg_alloc.GetVariableHostReg(op->lhs.Get());
-  auto rhs_reg = reg_alloc.GetVariableHostReg(op->rhs.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableGPR(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableGPR(op->rhs.Get());
 
   // TODO: save and restore XMM regs.
 

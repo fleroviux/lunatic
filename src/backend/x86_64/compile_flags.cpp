@@ -23,19 +23,19 @@ void X64Backend::CompileUpdateFlags(CompileContext const& context, IRUpdateFlags
   u32 mask = 0;
   auto& result_var = op->result.Get();
   auto& input_var = op->input.Get();
-  auto input_reg  = reg_alloc.GetVariableHostReg(input_var);
+  auto input_reg  = reg_alloc.GetVariableGPR(input_var);
 
-  reg_alloc.ReleaseVarAndReuseHostReg(input_var, result_var);
+  reg_alloc.ReleaseVarAndReuseGPR(input_var, result_var);
 
-  auto result_reg = reg_alloc.GetVariableHostReg(result_var);
+  auto result_reg = reg_alloc.GetVariableGPR(result_var);
 
   if (op->flag_n) mask |= 0x80000000;
   if (op->flag_z) mask |= 0x40000000;
   if (op->flag_c) mask |= 0x20000000;
   if (op->flag_v) mask |= 0x10000000;
 
-  auto pext_mask_reg = reg_alloc.GetTemporaryHostReg();
-  auto flags_reg = reg_alloc.GetTemporaryHostReg();
+  auto pext_mask_reg = reg_alloc.GetScratchGPR();
+  auto flags_reg = reg_alloc.GetScratchGPR();
 
   // Convert NZCV bits from AX register into the guest format.
   // Clear the bits which are not to be updated.
@@ -56,8 +56,8 @@ void X64Backend::CompileUpdateFlags(CompileContext const& context, IRUpdateFlags
 void X64Backend::CompileUpdateSticky(CompileContext const& context, IRUpdateSticky* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto input_reg  = reg_alloc.GetVariableHostReg(op->input.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto input_reg  = reg_alloc.GetVariableGPR(op->input.Get());
 
   code.movzx(result_reg, al);
   code.shl(result_reg, 27);
@@ -67,11 +67,11 @@ void X64Backend::CompileUpdateSticky(CompileContext const& context, IRUpdateStic
 void X64Backend::CompileUpdateGE(CompileContext const& context, IRUpdateGE* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto input_reg  = reg_alloc.GetVariableHostReg(op->input.Get());
+  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
+  auto input_reg  = reg_alloc.GetVariableGPR(op->input.Get());
 
-  auto temp0_reg = reg_alloc.GetTemporaryHostReg();
-  auto temp1_reg = reg_alloc.GetTemporaryHostReg();
+  auto temp0_reg = reg_alloc.GetScratchGPR();
+  auto temp1_reg = reg_alloc.GetScratchGPR();
   code.mov(temp1_reg, 0b10000000'10000000'10000000'10000000);
   code.movd(temp0_reg, xmm0);
   code.pext(temp0_reg, temp0_reg, temp1_reg);

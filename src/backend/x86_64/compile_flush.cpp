@@ -12,9 +12,9 @@ namespace lunatic::backend {
 void X64Backend::CompileFlush(CompileContext const& context, IRFlush* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto cpsr_reg = reg_alloc.GetVariableHostReg(op->cpsr_in.Get());
-  auto r15_in_reg = reg_alloc.GetVariableHostReg(op->address_in.Get());
-  auto r15_out_reg = reg_alloc.GetVariableHostReg(op->address_out.Get());
+  auto cpsr_reg = reg_alloc.GetVariableGPR(op->cpsr_in.Get());
+  auto r15_in_reg = reg_alloc.GetVariableGPR(op->address_in.Get());
+  auto r15_out_reg = reg_alloc.GetVariableGPR(op->address_out.Get());
 
   // Thanks to @wheremyfoodat (github.com/wheremyfoodat) for coming up with this.
   code.test(cpsr_reg, 1 << 5);
@@ -27,18 +27,18 @@ void X64Backend::CompileFlushExchange(const CompileContext &context, IRFlushExch
   DESTRUCTURE_CONTEXT;
 
   auto& address_in_var = op->address_in.Get();
-  auto  address_in_reg = reg_alloc.GetVariableHostReg(address_in_var);
+  auto  address_in_reg = reg_alloc.GetVariableGPR(address_in_var);
   auto& cpsr_in_var = op->cpsr_in.Get();
-  auto  cpsr_in_reg = reg_alloc.GetVariableHostReg(cpsr_in_var);
+  auto  cpsr_in_reg = reg_alloc.GetVariableGPR(cpsr_in_var);
 
   auto& address_out_var = op->address_out.Get();
   auto& cpsr_out_var = op->cpsr_out.Get();
 
-  reg_alloc.ReleaseVarAndReuseHostReg(address_in_var, address_out_var);
-  reg_alloc.ReleaseVarAndReuseHostReg(cpsr_in_var, cpsr_out_var);
+  reg_alloc.ReleaseVarAndReuseGPR(address_in_var, address_out_var);
+  reg_alloc.ReleaseVarAndReuseGPR(cpsr_in_var, cpsr_out_var);
 
-  auto address_out_reg = reg_alloc.GetVariableHostReg(address_out_var);
-  auto cpsr_out_reg = reg_alloc.GetVariableHostReg(cpsr_out_var);
+  auto address_out_reg = reg_alloc.GetVariableGPR(address_out_var);
+  auto cpsr_out_reg = reg_alloc.GetVariableGPR(cpsr_out_var);
 
   auto label_arm = Xbyak::Label{};
   auto label_done = Xbyak::Label{};

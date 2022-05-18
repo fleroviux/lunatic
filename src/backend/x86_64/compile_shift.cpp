@@ -15,11 +15,11 @@ void X64Backend::CompileLSL(CompileContext const& context, IRLogicalShiftLeft* o
   auto& amount = op->amount;
   auto& result_var = op->result.Get();
   auto& operand_var = op->operand.Get();
-  auto operand_reg = reg_alloc.GetVariableHostReg(operand_var);
+  auto operand_reg = reg_alloc.GetVariableGPR(operand_var);
 
-  reg_alloc.ReleaseVarAndReuseHostReg(operand_var, result_var);
+  reg_alloc.ReleaseVarAndReuseGPR(operand_var, result_var);
 
-  auto result_reg = reg_alloc.GetVariableHostReg(result_var);
+  auto result_reg = reg_alloc.GetVariableGPR(result_var);
 
   if (result_reg != operand_reg) {
     code.mov(result_reg, operand_reg);
@@ -33,7 +33,7 @@ void X64Backend::CompileLSL(CompileContext const& context, IRLogicalShiftLeft* o
     }
     code.shl(result_reg.cvt64(), u8(std::min(amount.GetConst().value, 33U)));
   } else {
-    auto amount_reg = reg_alloc.GetVariableHostReg(amount.GetVar());
+    auto amount_reg = reg_alloc.GetVariableGPR(amount.GetVar());
 
     code.push(rcx);
     code.mov(cl, 33);
@@ -60,11 +60,11 @@ void X64Backend::CompileLSR(CompileContext const& context, IRLogicalShiftRight* 
   auto& amount = op->amount;
   auto& result_var = op->result.Get();
   auto& operand_var = op->operand.Get();
-  auto operand_reg = reg_alloc.GetVariableHostReg(operand_var);
+  auto operand_reg = reg_alloc.GetVariableGPR(operand_var);
 
-  reg_alloc.ReleaseVarAndReuseHostReg(operand_var, result_var);
+  reg_alloc.ReleaseVarAndReuseGPR(operand_var, result_var);
 
-  auto result_reg = reg_alloc.GetVariableHostReg(result_var);
+  auto result_reg = reg_alloc.GetVariableGPR(result_var);
   
   if (result_reg != operand_reg) {
     code.mov(result_reg, operand_reg);
@@ -84,7 +84,7 @@ void X64Backend::CompileLSR(CompileContext const& context, IRLogicalShiftRight* 
 
     code.shr(result_reg.cvt64(), u8(std::min(amount_value, 33U)));
   } else {
-    auto amount_reg = reg_alloc.GetVariableHostReg(op->amount.GetVar());
+    auto amount_reg = reg_alloc.GetVariableGPR(op->amount.GetVar());
     code.push(rcx);
     code.mov(cl, 33);
     code.cmp(amount_reg.cvt8(), u8(33));
@@ -107,11 +107,11 @@ void X64Backend::CompileASR(CompileContext const& context, IRArithmeticShiftRigh
   auto& amount = op->amount;
   auto& result_var = op->result.Get();
   auto& operand_var = op->operand.Get();
-  auto operand_reg = reg_alloc.GetVariableHostReg(operand_var);
+  auto operand_reg = reg_alloc.GetVariableGPR(operand_var);
 
-  reg_alloc.ReleaseVarAndReuseHostReg(operand_var, result_var);
+  reg_alloc.ReleaseVarAndReuseGPR(operand_var, result_var);
 
-  auto result_reg = reg_alloc.GetVariableHostReg(result_var);
+  auto result_reg = reg_alloc.GetVariableGPR(result_var);
 
   // Mirror sign-bit in the upper 32-bit of the full 64-bit register.
   code.movsxd(result_reg.cvt64(), operand_reg);
@@ -132,7 +132,7 @@ void X64Backend::CompileASR(CompileContext const& context, IRArithmeticShiftRigh
 
     code.sar(result_reg.cvt64(), u8(std::min(amount_value, 33U)));
   } else {
-    auto amount_reg = reg_alloc.GetVariableHostReg(op->amount.GetVar());
+    auto amount_reg = reg_alloc.GetVariableGPR(op->amount.GetVar());
     code.push(rcx);
     code.mov(cl, 33);
     code.cmp(amount_reg.cvt8(), u8(33));
@@ -158,11 +158,11 @@ void X64Backend::CompileROR(CompileContext const& context, IRRotateRight* op) {
   auto& amount = op->amount;
   auto& result_var = op->result.Get();
   auto& operand_var = op->operand.Get();
-  auto operand_reg = reg_alloc.GetVariableHostReg(operand_var);
+  auto operand_reg = reg_alloc.GetVariableGPR(operand_var);
 
-  reg_alloc.ReleaseVarAndReuseHostReg(operand_var, result_var);
+  reg_alloc.ReleaseVarAndReuseGPR(operand_var, result_var);
 
-  auto result_reg = reg_alloc.GetVariableHostReg(result_var);
+  auto result_reg = reg_alloc.GetVariableGPR(result_var);
   auto label_done = Xbyak::Label{};
 
   if (result_reg != operand_reg) {
@@ -183,7 +183,7 @@ void X64Backend::CompileROR(CompileContext const& context, IRRotateRight* op) {
       code.ror(result_reg, u8(amount_value));
     }
   } else {
-    auto amount_reg = reg_alloc.GetVariableHostReg(op->amount.GetVar());
+    auto amount_reg = reg_alloc.GetVariableGPR(op->amount.GetVar());
     auto label_ok = Xbyak::Label{};
 
     // Handle (amount % 32) == 0 and amount == 0 cases.

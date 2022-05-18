@@ -62,7 +62,7 @@ void X64Backend::CompileMRC(CompileContext const& context, IRReadCoprocessorRegi
 
   Pop(code, regs_saved);
 
-  code.mov(reg_alloc.GetVariableHostReg(op->result.Get()), eax);
+  code.mov(reg_alloc.GetVariableGPR(op->result.Get()), eax);
   code.pop(rax);
 }
 
@@ -89,7 +89,7 @@ void X64Backend::CompileMCR(CompileContext const& context, IRWriteCoprocessorReg
   if (op->value.IsConstant()) {
     code.push(op->value.GetConst().value);
   } else {
-    code.push(reg_alloc.GetVariableHostReg(op->value.GetVar()).cvt64());
+    code.push(reg_alloc.GetVariableGPR(op->value.GetVar()).cvt64());
   }
   code.push(op->opcode2);
   code.sub(rsp, 0x20);
@@ -97,7 +97,7 @@ void X64Backend::CompileMCR(CompileContext const& context, IRWriteCoprocessorReg
   if (op->value.IsConstant()) {
     code.mov(kRegArg5, op->value.GetConst().value);
   } else {
-    code.mov(kRegArg5, reg_alloc.GetVariableHostReg(op->value.GetVar()));
+    code.mov(kRegArg5, reg_alloc.GetVariableGPR(op->value.GetVar()));
   }
   code.mov(kRegArg4, op->opcode2);
 #endif

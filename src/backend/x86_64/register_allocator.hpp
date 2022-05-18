@@ -38,37 +38,39 @@ struct X64RegisterAllocator {
   void AdvanceLocation();
 
   /**
-   * Get the host register currently allocated to a variable.
+   * Get the host GPR currently allocated to a variable.
+   * Allocate a host GPR is the variable has not been allocated yet.
    * 
    * @param  var  The variable
-   * @returns the host register
+   * @returns the host GPR
    */
-  auto GetVariableHostReg(
+  auto GetVariableGPR(
     lunatic::frontend::IRVariable const& var
   ) -> Xbyak::Reg32;
 
   /**
-   * Get a temporary host register for use during the current opcode.
+   * Get a scratch host GPR for use during the current opcode.
+   * The host GPR will be automatically released after the current opcode.
    * 
-   * @returns the host register
+   * @returns the host GPR
    */
-  auto GetTemporaryHostReg() -> Xbyak::Reg32;
+  auto GetScratchGPR() -> Xbyak::Reg32;
 
   /**
    * If var_old will be released after the current opcode,
-   * then it will be released early and the host register
+   * then it will be released early and the host GPR
    * allocated to it will be moved to var_new.
    * The caller is responsible to not read var_old after writing var_new.
    * 
    * @param  var_old  the variable to release
-   * @param  var_new  the variable to receive the released host register
+   * @param  var_new  the variable to receive the released host GPR
    */
-  void ReleaseVarAndReuseHostReg(
+  void ReleaseVarAndReuseGPR(
     lunatic::frontend::IRVariable const& var_old,
     lunatic::frontend::IRVariable const& var_new
   );
 
-  bool IsHostRegFree(Xbyak::Reg64 reg) const;
+  bool IsGPRFree(Xbyak::Reg64 reg) const;
 
 private:
   /// Determine when each variable will be dead.
@@ -87,16 +89,16 @@ private:
    *
    * @returns the host register
    */
-  auto FindFreeHostReg() -> Xbyak::Reg32;
+  auto FindFreeGPR() -> Xbyak::Reg32;
 
   IREmitter const& emitter;
   Xbyak::CodeGenerator& code;
 
-  /// Host register that are free and can be allocated.
-  std::vector<Xbyak::Reg32> free_host_regs;
+  /// Host GPRs that are free and can be allocated.
+  std::vector<Xbyak::Reg32> free_host_gprs;
 
-  /// Map variable to its allocated host register (if any).
-  std::vector<Optional<Xbyak::Reg32>> var_id_to_host_reg;
+  /// Map variable to its allocated host GPR (if any).
+  std::vector<Optional<Xbyak::Reg32>> var_id_to_host_gpr;
   
   /// Map variable to the last location where it's accessed.
   std::vector<int> var_id_to_point_of_last_use;
@@ -108,7 +110,7 @@ private:
   std::vector<Optional<int>> var_id_to_spill_slot;
 
   /// Array of currently allocated scratch registers.
-  std::vector<Xbyak::Reg32> temp_host_regs;
+  std::vector<Xbyak::Reg32> temp_host_gprs;
 
   /// The current IR program location.
   int location = 0;

@@ -420,7 +420,7 @@ auto X64Backend::GetUsedHostRegsFromList(
   auto regs_used = std::vector<Xbyak::Reg64>{};
 
   for (auto reg : regs) {
-    if (!reg_alloc.IsHostRegFree(reg)) {
+    if (!reg_alloc.IsGPRFree(reg)) {
       regs_used.push_back(reg);
     }
   }
