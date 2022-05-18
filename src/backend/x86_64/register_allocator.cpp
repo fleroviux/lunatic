@@ -39,19 +39,18 @@ X64RegisterAllocator::X64RegisterAllocator(
   };
 
   // XMM0 is statically allocated for GE flags.
-  // TODO: use XMM8 to XMM31 when available.
+  // TODO: use XMM6 to XMM31 when available.
   free_host_xmms = {
     xmm1,
     xmm2,
     xmm3,
     xmm4,
     xmm5,
-    xmm6,
-    xmm7
   };
 
   auto number_of_vars = emitter.Vars().size();
   var_id_to_host_gpr.resize(number_of_vars);
+  var_id_to_host_xmm.resize(number_of_vars);
   var_id_to_point_of_last_use.resize(number_of_vars);
   var_id_to_spill_slot.resize(number_of_vars);
 
@@ -72,24 +71,48 @@ void X64RegisterAllocator::AdvanceLocation() {
 }
 
 auto X64RegisterAllocator::GetVariableGPR(IRVariable const& var) -> Xbyak::Reg32 {
-  // Check if the variable is already allocated to a register at the moment.
-  auto maybe_reg = var_id_to_host_gpr[var.id];
-  if (maybe_reg.HasValue()) {
-    return maybe_reg.Unwrap();
+  auto& maybe_gpr = var_id_to_host_gpr[var.id];
+  
+  if (maybe_gpr.HasValue()) {
+    return maybe_gpr.Unwrap();
   }
 
   auto reg = FindFreeGPR();
 
-  // If the variable was spilled previously then restore its previous value.
-  auto maybe_spill = var_id_to_spill_slot[var.id];
+  auto& maybe_xmm = var_id_to_host_xmm[var.id];
+  auto& maybe_spill = var_id_to_spill_slot[var.id];
+
   if (maybe_spill.HasValue()) {
     auto slot = maybe_spill.Unwrap();
     code.mov(reg, dword[rbp + slot * sizeof(u32)]);
     free_spill_bitmap[slot] = false;
-    var_id_to_spill_slot[var.id] = {};
+    maybe_spill = {};
+  } else if (maybe_xmm.HasValue()) {
+    code.movq(reg.cvt64(), maybe_xmm.Unwrap());
+    maybe_xmm = {};
   }
 
   var_id_to_host_gpr[var.id] = reg;
+  return reg;
+}
+
+auto X64RegisterAllocator::GetVariableXMM(lunatic::frontend::IRVariable const& var) -> Xbyak::Xmm {
+  auto& maybe_xmm = var_id_to_host_xmm[var.id];
+  
+  if (maybe_xmm.HasValue()) {
+    return maybe_xmm.Unwrap();
+  }
+
+  auto reg = FindFreeXMM();
+
+  // If the variable is currently allocated to a GPR, move it from the GPR to the XMM register.
+  auto& maybe_gpr = var_id_to_host_gpr[var.id];
+  if (maybe_gpr.HasValue()) {
+    code.movq(reg, maybe_gpr.Unwrap().cvt64());
+    maybe_gpr = {};
+  }
+
+  var_id_to_host_xmm[var.id] = reg;
   return reg;
 }
 

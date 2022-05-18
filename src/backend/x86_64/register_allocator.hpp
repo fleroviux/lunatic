@@ -40,6 +40,8 @@ struct X64RegisterAllocator {
   /**
    * Get the host GPR currently allocated to a variable.
    * Allocate a host GPR is the variable has not been allocated yet.
+   * If the variable is allocated to a XMM registers,
+   * move it from the XMM registers into a free GPR (only the lower 64-bit are preserved).
    * 
    * @param  var  The variable
    * @returns the host GPR
@@ -47,6 +49,18 @@ struct X64RegisterAllocator {
   auto GetVariableGPR(
     lunatic::frontend::IRVariable const& var
   ) -> Xbyak::Reg32;
+
+  /**
+   * Get the host XMM registers currently allocated to a variable.
+   * Allocate a host XMM registers is the variable has not been allocated yet.
+   * If the variable is allocated to a GPR, move it from the GPR into a free XMM register.
+   * 
+   * @param  var  The variable
+   * @returns the host XMM register
+   */
+  auto GetVariableXMM(
+    lunatic::frontend::IRVariable const& var
+  ) -> Xbyak::Xmm;
 
   /**
    * Get a scratch host GPR for use during the current opcode.
@@ -117,6 +131,9 @@ private:
 
   /// Map variable to its allocated host GPR (if any).
   std::vector<Optional<Xbyak::Reg32>> var_id_to_host_gpr;
+
+  /// Map variable to its allocated host XMM register (if any).
+  std::vector<Optional<Xbyak::Xmm>> var_id_to_host_xmm;
   
   /// Map variable to the last location where it's accessed.
   std::vector<int> var_id_to_point_of_last_use;

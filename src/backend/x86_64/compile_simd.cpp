@@ -12,23 +12,19 @@ namespace lunatic::backend {
 void X64Backend::CompilePADDS16(CompileContext const& context, IRParallelAddS16* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto result_reg = reg_alloc.GetVariableGPR(op->result.Get());
-  auto lhs_reg = reg_alloc.GetVariableGPR(op->lhs.Get());
-  auto rhs_reg = reg_alloc.GetVariableGPR(op->rhs.Get());
-  
-  // TODO: save and restore XMM regs.
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
 
-  code.movq(xmm1, lhs_reg.cvt64());
-  code.movq(xmm2, rhs_reg.cvt64());
-  code.movq(xmm3, xmm1);
-  code.paddw(xmm3, xmm2);
-  code.movd(result_reg, xmm3);
+  code.movq(result_reg, lhs_reg);
+  code.paddw(result_reg, rhs_reg);
 
   // Calculate GE flags to XMM0
-  code.movq(xmm0, xmm1);
-  code.paddsw(xmm0, xmm2);
-  code.pcmpeqw(xmm1, xmm1);
-  code.pcmpgtw(xmm0, xmm1);
+  auto scratch = reg_alloc.GetScratchXMM();
+  code.movq(xmm0, lhs_reg);
+  code.paddsw(xmm0, rhs_reg);
+  code.pcmpeqw(scratch, scratch);
+  code.pcmpgtw(xmm0, scratch);
 }
 
 void X64Backend::CompilePADDU16(CompileContext const& context, IRParallelAddU16* op) {
