@@ -382,6 +382,8 @@ void X64Backend::CompileIROp(
     // SIMD (media instructions)
     case IROpcodeClass::PADDS16: CompilePADDS16(context, lunatic_cast<IRParallelAddS16>(op.get())); break;
     case IROpcodeClass::PADDU16: CompilePADDU16(context, lunatic_cast<IRParallelAddU16>(op.get())); break;
+    case IROpcodeClass::PSUBS16: CompilePSUBS16(context, lunatic_cast<IRParallelSubS16>(op.get())); break;
+    case IROpcodeClass::PSUBU16: CompilePSUBU16(context, lunatic_cast<IRParallelSubU16>(op.get())); break;
     case IROpcodeClass::PQADDS16: CompilePQADDS16(context, lunatic_cast<IRParallelSaturateAddS16>(op.get())); break;
     case IROpcodeClass::PQADDU16: CompilePQADDU16(context, lunatic_cast<IRParallelSaturateAddU16>(op.get())); break;
 

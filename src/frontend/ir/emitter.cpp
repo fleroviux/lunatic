@@ -425,6 +425,22 @@ void IREmitter::PADDU16(
   Push<IRParallelAddU16>(result, lhs, rhs);
 }
 
+void IREmitter::PSUBS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSubS16>(result, lhs, rhs);
+}
+
+void IREmitter::PSUBU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSubU16>(result, lhs, rhs);
+}
+
 void IREmitter::PQADDS16(
   IRVariable const& result,
   IRVariable const& lhs,

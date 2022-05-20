@@ -58,6 +58,8 @@ enum class IROpcodeClass {
   MCR,
   PADDS16,
   PADDU16,
+  PSUBS16,
+  PSUBU16,
   PQADDS16,
   PQADDU16
 };
@@ -1377,6 +1379,22 @@ struct IRParallelAddU16 final : IRParallelAddSubBase<IROpcodeClass::PADDU16> {
 
   auto ToString() -> std::string override {
     return IRParallelAddSubBase::ToString("uadd16");
+  }
+};
+
+struct IRParallelSubS16 final : IRParallelAddSubBase<IROpcodeClass::PSUBS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("ssub16");
+  }
+};
+
+struct IRParallelSubU16 final : IRParallelAddSubBase<IROpcodeClass::PSUBU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("usub16");
   }
 };
 

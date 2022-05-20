@@ -283,6 +283,18 @@ struct IREmitter {
     IRVariable const& rhs
   );
 
+  void PSUBS16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
+  void PSUBU16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
   void PQADDS16(
     IRVariable const& result,
     IRVariable const& lhs,

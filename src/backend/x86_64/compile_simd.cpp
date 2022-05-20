@@ -48,6 +48,51 @@ void X64Backend::CompilePADDU16(CompileContext const& context, IRParallelAddU16*
   code.pcmpgtw(xmm0, scratch);
 }
 
+void X64Backend::CompilePSUBS16(CompileContext const& context, IRParallelSubS16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.psubw(result_reg, rhs_reg);
+
+  // Calculate GE flags to XMM0
+  auto scratch = reg_alloc.GetScratchXMM();
+  code.movq(xmm0, lhs_reg);
+  code.psubsw(xmm0, rhs_reg);
+  code.pcmpeqw(scratch, scratch);
+  code.pcmpgtw(xmm0, scratch);
+}
+
+void X64Backend::CompilePSUBU16(CompileContext const& context, IRParallelSubU16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.psubw(result_reg, rhs_reg);
+
+  // Calculate GE flags to XMM0
+  // TODO: make this more efficient.
+  auto scratch0 = reg_alloc.GetScratchXMM();
+  auto scratch1 = reg_alloc.GetScratchXMM();
+  // scratch0 = 0x80008000
+  // scratch1 = 0x00010001
+  code.pcmpeqw(scratch, scratch);
+  code.psllw(scratch, 15);
+  code.movq(scratch1, scratch);
+  code.psrlw(scratch1, 15);
+  code.movq(xmm0, lhs_reg);
+  code.paddw(xmm0, scratch);
+  code.paddw(xmm0, scratch1);
+  code.paddw(scratch, rhs_reg);
+  code.pcmpgtw(xmm0, scratch);
+}
+
 void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
   DESTRUCTURE_CONTEXT;
 

@@ -112,6 +112,8 @@ private:
   void CompileMCR(CompileContext const& context, IRWriteCoprocessorRegister* op);
   void CompilePADDS16(CompileContext const& context, IRParallelAddS16* op);
   void CompilePADDU16(CompileContext const& context, IRParallelAddU16* op);
+  void CompilePSUBS16(CompileContext const& context, IRParallelSubS16* op);
+  void CompilePSUBU16(CompileContext const& context, IRParallelSubU16* op);
   void CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op);
   void CompilePQADDU16(CompileContext const& context, IRParallelSaturateAddU16* op);
 
