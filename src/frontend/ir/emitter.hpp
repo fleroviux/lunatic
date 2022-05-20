@@ -307,6 +307,18 @@ struct IREmitter {
     IRVariable const& rhs
   );
 
+  void PQSUBS16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
+  void PQSUBU16(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
 private:
   template<typename T, typename... Args>
   void Push(Args&&... args) {

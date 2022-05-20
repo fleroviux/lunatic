@@ -82,15 +82,15 @@ void X64Backend::CompilePSUBU16(CompileContext const& context, IRParallelSubU16*
   auto scratch1 = reg_alloc.GetScratchXMM();
   // scratch0 = 0x80008000
   // scratch1 = 0x00010001
-  code.pcmpeqw(scratch, scratch);
-  code.psllw(scratch, 15);
-  code.movq(scratch1, scratch);
+  code.pcmpeqw(scratch0, scratch0);
+  code.psllw(scratch0, 15);
+  code.movq(scratch1, scratch0);
   code.psrlw(scratch1, 15);
   code.movq(xmm0, lhs_reg);
-  code.paddw(xmm0, scratch);
+  code.paddw(xmm0, scratch0);
   code.paddw(xmm0, scratch1);
-  code.paddw(scratch, rhs_reg);
-  code.pcmpgtw(xmm0, scratch);
+  code.paddw(scratch0, rhs_reg);
+  code.pcmpgtw(xmm0, scratch0);
 }
 
 void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
@@ -113,6 +113,28 @@ void X64Backend::CompilePQADDU16(CompileContext const& context, IRParallelSatura
 
   code.movq(result_reg, lhs_reg);
   code.paddusw(result_reg, rhs_reg);
+}
+
+void X64Backend::CompilePQSUBS16(CompileContext const& context, IRParallelSaturateSubS16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.psubsw(result_reg, rhs_reg);
+}
+
+void X64Backend::CompilePQSUBU16(CompileContext const& context, IRParallelSaturateSubU16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.psubusw(result_reg, rhs_reg);
 }
 
 } // namespace lunatic::backend
