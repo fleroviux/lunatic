@@ -25,10 +25,12 @@ auto Translator::Handle(ARMParallelAddSub const& opcode) -> Status {
     case Op::SSUB16:  emitter->PSUBS16 (result, lhs, rhs); break;
     case Op::QADD16:  emitter->PQADDS16(result, lhs, rhs); break;
     case Op::QSUB16:  emitter->PQSUBS16(result, lhs, rhs); break;
+    case Op::SHADD16: emitter->PHADDS16(result, lhs, rhs); break;
     case Op::UADD16:  emitter->PADDU16 (result, lhs, rhs); break;
     case Op::USUB16:  emitter->PSUBU16 (result, lhs, rhs); break;
     case Op::UQADD16: emitter->PQADDU16(result, lhs, rhs); break;
     case Op::UQSUB16: emitter->PQSUBU16(result, lhs, rhs); break;
+    case Op::UHADD16: emitter->PHADDU16(result, lhs, rhs); break;
   }
 
   emitter->StoreGPR(IRGuestReg{opcode.reg_dst, mode}, result);

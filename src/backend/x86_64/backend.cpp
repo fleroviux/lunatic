@@ -388,6 +388,8 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::PQADDU16: CompilePQADDU16(context, lunatic_cast<IRParallelSaturateAddU16>(op.get())); break;
     case IROpcodeClass::PQSUBS16: CompilePQSUBS16(context, lunatic_cast<IRParallelSaturateSubS16>(op.get())); break;
     case IROpcodeClass::PQSUBU16: CompilePQSUBU16(context, lunatic_cast<IRParallelSaturateSubU16>(op.get())); break;
+    case IROpcodeClass::PHADDS16: CompilePHADDS16(context, lunatic_cast<IRParallelHalvingAddS16>(op.get())); break;
+    case IROpcodeClass::PHADDU16: CompilePHADDU16(context, lunatic_cast<IRParallelHalvingAddU16>(op.get())); break;
 
     default: {
       throw std::runtime_error(
