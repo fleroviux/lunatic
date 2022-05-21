@@ -145,14 +145,14 @@ void X64Backend::CompilePHADDS16(CompileContext const& context, IRParallelHalvin
   auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
   auto scratch = reg_alloc.GetScratchXMM();
 
-  code.pcmpeqb(scratch, scratch);
-  code.psrlw(scratch, 1);
+  //  a + b = (a ^ b) + ((a & b) << 1)
+  // (a + b) >>> 1 = ((a ^ b) >>> 1) + (a & b)
   code.movq(result_reg, lhs_reg);
-  code.pxor(result_reg, scratch);
-  code.pxor(rhs_reg, scratch);
-  code.pavgw(result_reg, rhs_reg);
-  code.pxor(result_reg, scratch);
-  code.pxor(rhs_reg, scratch);
+  code.pxor(result_reg, rhs_reg);
+  code.psraw(result_reg, 1);
+  code.movq(scratch, lhs_reg);
+  code.pand(scratch, rhs_reg);
+  code.paddw(result_reg, scratch);
 }
  
 void X64Backend::CompilePHADDU16(CompileContext const& context, IRParallelHalvingAddU16* op) {
@@ -163,13 +163,14 @@ void X64Backend::CompilePHADDU16(CompileContext const& context, IRParallelHalvin
   auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
   auto scratch = reg_alloc.GetScratchXMM();
 
-  code.pcmpeqb(scratch, scratch);
+  //  a + b = (a ^ b) + ((a & b) << 1)
+  // (a + b) >> 1 = ((a ^ b) >> 1) + (a & b)
   code.movq(result_reg, lhs_reg);
-  code.pxor(result_reg, scratch);
-  code.pxor(rhs_reg, scratch);
-  code.pavgw(result_reg, rhs_reg);
-  code.pxor(result_reg, scratch);
-  code.pxor(rhs_reg, scratch);
+  code.pxor(result_reg, rhs_reg);
+  code.psrlw(result_reg, 1);
+  code.movq(scratch, lhs_reg);
+  code.pand(scratch, rhs_reg);
+  code.paddw(result_reg, scratch);
 }
 
 } // namespace lunatic::backend
