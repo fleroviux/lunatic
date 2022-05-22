@@ -513,6 +513,14 @@ void IREmitter::PHADDS8(
   Push<IRParallelHalvingAddS8>(result, lhs, rhs);
 }
 
+void IREmitter::PHADDU8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingAddU8>(result, lhs, rhs);
+}
+
 void IREmitter::PHADDS16(
   IRVariable const& result,
   IRVariable const& lhs,
