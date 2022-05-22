@@ -307,6 +307,12 @@ struct IREmitter {
     IRVariable const& rhs
   );
 
+  void PQADDS8(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
   void PQADDS16(
     IRVariable const& result,
     IRVariable const& lhs,

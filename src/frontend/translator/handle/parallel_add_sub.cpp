@@ -33,6 +33,7 @@ auto Translator::Handle(ARMParallelAddSub const& opcode) -> Status {
     case Op::UADD8:   emitter->PADDU8  (result, lhs, rhs); break;
     case Op::UQADD16: emitter->PQADDU16(result, lhs, rhs); break;
     case Op::UQSUB16: emitter->PQSUBU16(result, lhs, rhs); break;
+    case Op::QADD8:   emitter->PQADDS8 (result, lhs, rhs); break;
     case Op::UHADD16: emitter->PHADDU16(result, lhs, rhs); break;
     case Op::UHSUB16: emitter->PHSUBU16(result, lhs, rhs); break;
   }

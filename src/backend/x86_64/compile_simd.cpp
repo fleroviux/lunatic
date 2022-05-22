@@ -40,9 +40,6 @@ void X64Backend::CompilePADDU8(CompileContext const& context, IRParallelAddU8* o
   // Calculate GE flags to XMM0
   auto scratch = reg_alloc.GetScratchXMM();
   auto scratch_gpr = reg_alloc.GetScratchGPR();
-  // scratch = 0x80808080
-  // code.pcmpeqb(scratch, scratch);
-  // code.psllb(scratch, 7);
   code.mov(scratch_gpr, 0x80808080);
   code.movd(scratch, scratch_gpr);
   code.movq(xmm0, lhs_reg);
@@ -133,6 +130,17 @@ void X64Backend::CompilePSUBU16(CompileContext const& context, IRParallelSubU16*
   code.paddw(xmm0, scratch1);
   code.paddw(scratch0, rhs_reg);
   code.pcmpgtw(xmm0, scratch0);
+}
+
+void X64Backend::CompilePQADDS8(CompileContext const& context, IRParallelSaturateAddS8* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.paddsb(result_reg, rhs_reg);
 }
 
 void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
