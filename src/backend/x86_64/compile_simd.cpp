@@ -182,14 +182,8 @@ void X64Backend::CompilePHSUBS16(CompileContext const& context, IRParallelHalvin
   auto scratch = reg_alloc.GetScratchXMM();
 
   // calculate MSB (bit 15) of result
-  code.pcmpeqb(scratch, scratch);
-  code.psllw(scratch, 15); // = 0x80008000
   code.movq(result_reg, lhs_reg);
-  code.pxor(result_reg, scratch);
-  code.pxor(scratch, rhs_reg);
-  code.psubsw(result_reg, scratch);
-  code.pxor(result_reg, lhs_reg);
-  code.pxor(result_reg, rhs_reg);
+  code.psubsw(result_reg, rhs_reg);
   code.psrlw(result_reg, 15);
   code.psllw(result_reg, 15);
 
