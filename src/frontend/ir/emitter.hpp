@@ -337,6 +337,12 @@ struct IREmitter {
     IRVariable const& rhs
   );
 
+  void PHADDS8(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  );
+
   void PHADDS16(
     IRVariable const& result,
     IRVariable const& lhs,
