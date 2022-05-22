@@ -57,6 +57,7 @@ enum class IROpcodeClass {
   MRC,
   MCR,
   PADDS8,
+  PADDU8,
   PADDS16,
   PADDU16,
   PSUBS16,
@@ -1378,6 +1379,14 @@ struct IRParallelAddS8 final : IRParallelAddSubBase<IROpcodeClass::PADDS8> {
 
   auto ToString() -> std::string override {
     return IRParallelAddSubBase::ToString("sadd8");
+  }
+};
+
+struct IRParallelAddU8 final : IRParallelAddSubBase<IROpcodeClass::PADDU8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uadd8");
   }
 };
 

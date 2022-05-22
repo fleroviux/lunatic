@@ -417,6 +417,14 @@ void IREmitter::PADDS8(
   Push<IRParallelAddS8>(result, lhs, rhs);
 }
 
+void IREmitter::PADDU8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddU8>(result, lhs, rhs);
+}
+
 void IREmitter::PADDS16(
   IRVariable const& result,
   IRVariable const& lhs,

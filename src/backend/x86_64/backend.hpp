@@ -111,6 +111,7 @@ private:
   void CompileMRC(CompileContext const& context, IRReadCoprocessorRegister* op);
   void CompileMCR(CompileContext const& context, IRWriteCoprocessorRegister* op);
   void CompilePADDS8(CompileContext const& context, IRParallelAddS8* op);
+  void CompilePADDU8(CompileContext const& context, IRParallelAddU8* op);
   void CompilePADDS16(CompileContext const& context, IRParallelAddS16* op);
   void CompilePADDU16(CompileContext const& context, IRParallelAddU16* op);
   void CompilePSUBS16(CompileContext const& context, IRParallelSubS16* op);
