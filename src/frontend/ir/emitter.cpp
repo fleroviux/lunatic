@@ -489,5 +489,21 @@ void IREmitter::PHADDU16(
   Push<IRParallelHalvingAddU16>(result, lhs, rhs);
 }
 
+void IREmitter::PHSUBS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingSubS16>(result, lhs, rhs);
+}
+
+void IREmitter::PHSUBU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingSubU16>(result, lhs, rhs);
+}
+
 } // namespace lunatic::frontend
 } // namespace lunatic

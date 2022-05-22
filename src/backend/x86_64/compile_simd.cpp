@@ -173,4 +173,56 @@ void X64Backend::CompilePHADDU16(CompileContext const& context, IRParallelHalvin
   code.paddw(result_reg, scratch);
 }
 
+void X64Backend::CompilePHSUBS16(CompileContext const& context, IRParallelHalvingSubS16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+  auto scratch = reg_alloc.GetScratchXMM();
+
+  // calculate MSB (bit 15) of result
+  code.pcmpeqb(scratch, scratch);
+  code.psllw(scratch, 15); // = 0x80008000
+  code.movq(result_reg, lhs_reg);
+  code.pxor(result_reg, scratch);
+  code.pxor(scratch, rhs_reg);
+  code.psubsw(result_reg, scratch);
+  code.pxor(result_reg, lhs_reg);
+  code.pxor(result_reg, rhs_reg);
+  code.psrlw(result_reg, 15);
+  code.psllw(result_reg, 15);
+
+  // calculate lower 15 bits of the result and OR the MSB.
+  code.movq(scratch, lhs_reg);
+  code.psubw(scratch, rhs_reg);
+  code.psrlw(scratch, 1);
+  code.por(result_reg, scratch);
+}
+ 
+void X64Backend::CompilePHSUBU16(CompileContext const& context, IRParallelHalvingSubU16* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+  auto scratch = reg_alloc.GetScratchXMM();
+
+  // calculate MSB (bit 15) of result
+  code.pcmpeqb(scratch, scratch);
+  code.psllw(scratch, 15); // = 0x80008000
+  code.movq(result_reg, lhs_reg);
+  code.pxor(result_reg, scratch);
+  code.pxor(scratch, rhs_reg);
+  code.psubsw(result_reg, scratch);
+  code.psrlw(result_reg, 15);
+  code.psllw(result_reg, 15);
+
+  // calculate lower 15 bits of the result and OR the MSB.
+  code.movq(scratch, lhs_reg);
+  code.psubw(scratch, rhs_reg);
+  code.psrlw(scratch, 1);
+  code.por(result_reg, scratch);
+}
+
 } // namespace lunatic::backend

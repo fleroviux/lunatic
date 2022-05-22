@@ -120,6 +120,8 @@ private:
   void CompilePQSUBU16(CompileContext const& context, IRParallelSaturateSubU16* op);
   void CompilePHADDS16(CompileContext const& context, IRParallelHalvingAddS16* op);
   void CompilePHADDU16(CompileContext const& context, IRParallelHalvingAddU16* op);
+  void CompilePHSUBS16(CompileContext const& context, IRParallelHalvingSubS16* op);
+  void CompilePHSUBU16(CompileContext const& context, IRParallelHalvingSubU16* op);
 
   Memory& memory;
   State& state;
