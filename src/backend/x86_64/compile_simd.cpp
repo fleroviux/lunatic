@@ -143,6 +143,17 @@ void X64Backend::CompilePQADDS8(CompileContext const& context, IRParallelSaturat
   code.paddsb(result_reg, rhs_reg);
 }
 
+void X64Backend::CompilePQADDU8(CompileContext const& context, IRParallelSaturateAddU8* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.paddusb(result_reg, rhs_reg);
+}
+
 void X64Backend::CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op) {
   DESTRUCTURE_CONTEXT;
 

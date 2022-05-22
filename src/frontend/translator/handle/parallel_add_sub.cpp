@@ -26,6 +26,7 @@ auto Translator::Handle(ARMParallelAddSub const& opcode) -> Status {
     case Op::SADD8:   emitter->PADDS8  (result, lhs, rhs); break;
     case Op::QADD16:  emitter->PQADDS16(result, lhs, rhs); break;
     case Op::QSUB16:  emitter->PQSUBS16(result, lhs, rhs); break;
+    case Op::QADD8:   emitter->PQADDS8 (result, lhs, rhs); break;
     case Op::SHADD16: emitter->PHADDS16(result, lhs, rhs); break;
     case Op::SHSUB16: emitter->PHSUBS16(result, lhs, rhs); break;
     case Op::SHADD8:  emitter->PHADDS8 (result, lhs, rhs); break;
@@ -34,7 +35,7 @@ auto Translator::Handle(ARMParallelAddSub const& opcode) -> Status {
     case Op::UADD8:   emitter->PADDU8  (result, lhs, rhs); break;
     case Op::UQADD16: emitter->PQADDU16(result, lhs, rhs); break;
     case Op::UQSUB16: emitter->PQSUBU16(result, lhs, rhs); break;
-    case Op::QADD8:   emitter->PQADDS8 (result, lhs, rhs); break;
+    case Op::UQADD8:  emitter->PQADDU8 (result, lhs, rhs); break;
     case Op::UHADD16: emitter->PHADDU16(result, lhs, rhs); break;
     case Op::UHSUB16: emitter->PHSUBU16(result, lhs, rhs); break;
   }

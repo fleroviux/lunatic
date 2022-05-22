@@ -63,6 +63,7 @@ enum class IROpcodeClass {
   PSUBS16,
   PSUBU16,
   PQADDS8,
+  PQADDU8,
   PQADDS16,
   PQADDU16,
   PQSUBS16,
@@ -1428,9 +1429,18 @@ struct IRParallelSaturateAddS8 final : IRParallelAddSubBase<IROpcodeClass::PQADD
   using IRParallelAddSubBase::IRParallelAddSubBase;
 
   auto ToString() -> std::string override {
-    return IRParallelAddSubBase::ToString("uadd8");
+    return IRParallelAddSubBase::ToString("qadd8");
   }
 };
+
+struct IRParallelSaturateAddU8 final : IRParallelAddSubBase<IROpcodeClass::PQADDU8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uqadd8");
+  }
+};
+
 
 struct IRParallelSaturateAddS16 final : IRParallelAddSubBase<IROpcodeClass::PQADDS16> {
   using IRParallelAddSubBase::IRParallelAddSubBase;

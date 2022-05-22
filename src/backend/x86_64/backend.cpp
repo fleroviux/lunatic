@@ -387,6 +387,7 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::PSUBS16: CompilePSUBS16(context, lunatic_cast<IRParallelSubS16>(op.get())); break;
     case IROpcodeClass::PSUBU16: CompilePSUBU16(context, lunatic_cast<IRParallelSubU16>(op.get())); break;
     case IROpcodeClass::PQADDS8: CompilePQADDS8(context, lunatic_cast<IRParallelSaturateAddS8>(op.get())); break;
+    case IROpcodeClass::PQADDU8: CompilePQADDU8(context, lunatic_cast<IRParallelSaturateAddU8>(op.get())); break;
     case IROpcodeClass::PQADDS16: CompilePQADDS16(context, lunatic_cast<IRParallelSaturateAddS16>(op.get())); break;
     case IROpcodeClass::PQADDU16: CompilePQADDU16(context, lunatic_cast<IRParallelSaturateAddU16>(op.get())); break;
     case IROpcodeClass::PQSUBS16: CompilePQSUBS16(context, lunatic_cast<IRParallelSaturateSubS16>(op.get())); break;

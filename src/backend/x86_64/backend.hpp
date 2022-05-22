@@ -117,6 +117,7 @@ private:
   void CompilePSUBS16(CompileContext const& context, IRParallelSubS16* op);
   void CompilePSUBU16(CompileContext const& context, IRParallelSubU16* op);
   void CompilePQADDS8(CompileContext const& context, IRParallelSaturateAddS8* op);
+  void CompilePQADDU8(CompileContext const& context, IRParallelSaturateAddU8* op);
   void CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op);
   void CompilePQADDU16(CompileContext const& context, IRParallelSaturateAddU16* op);
   void CompilePQSUBS16(CompileContext const& context, IRParallelSaturateSubS16* op);
