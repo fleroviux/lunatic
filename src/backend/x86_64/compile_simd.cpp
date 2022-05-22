@@ -9,6 +9,24 @@
 
 namespace lunatic::backend {
 
+void X64Backend::CompilePADDS8(CompileContext const& context, IRParallelAddS8* op) {
+  DESTRUCTURE_CONTEXT;
+
+  auto result_reg = reg_alloc.GetVariableXMM(op->result.Get());
+  auto lhs_reg = reg_alloc.GetVariableXMM(op->lhs.Get());
+  auto rhs_reg = reg_alloc.GetVariableXMM(op->rhs.Get());
+
+  code.movq(result_reg, lhs_reg);
+  code.paddb(result_reg, rhs_reg);
+
+  // Calculate GE flags to XMM0
+  auto scratch = reg_alloc.GetScratchXMM();
+  code.movq(xmm0, lhs_reg);
+  code.paddsb(xmm0, rhs_reg);
+  code.pcmpeqb(scratch, scratch);
+  code.pcmpgtb(xmm0, scratch);
+}
+
 void X64Backend::CompilePADDS16(CompileContext const& context, IRParallelAddS16* op) {
   DESTRUCTURE_CONTEXT;
 

@@ -380,6 +380,7 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::MCR: CompileMCR(context, lunatic_cast<IRWriteCoprocessorRegister>(op.get())); break;
 
     // SIMD (media instructions)
+    case IROpcodeClass::PADDS8: CompilePADDS8(context, lunatic_cast<IRParallelAddS8>(op.get())); break;
     case IROpcodeClass::PADDS16: CompilePADDS16(context, lunatic_cast<IRParallelAddS16>(op.get())); break;
     case IROpcodeClass::PADDU16: CompilePADDU16(context, lunatic_cast<IRParallelAddU16>(op.get())); break;
     case IROpcodeClass::PSUBS16: CompilePSUBS16(context, lunatic_cast<IRParallelSubS16>(op.get())); break;

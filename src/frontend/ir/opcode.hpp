@@ -56,6 +56,7 @@ enum class IROpcodeClass {
   QSUB,
   MRC,
   MCR,
+  PADDS8,
   PADDS16,
   PADDU16,
   PSUBS16,
@@ -1369,6 +1370,14 @@ protected:
       std::to_string(lhs),
       std::to_string(rhs)
     );
+  }
+};
+
+struct IRParallelAddS8 final : IRParallelAddSubBase<IROpcodeClass::PADDS8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("sadd8");
   }
 };
 

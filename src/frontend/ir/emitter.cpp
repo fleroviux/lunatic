@@ -409,6 +409,14 @@ void IREmitter::MCR(
   Push<IRWriteCoprocessorRegister>(value, coprocessor_id, opcode1, cn, cm, opcode2);
 }
 
+void IREmitter::PADDS8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddS8>(result, lhs, rhs);
+}
+
 void IREmitter::PADDS16(
   IRVariable const& result,
   IRVariable const& lhs,
