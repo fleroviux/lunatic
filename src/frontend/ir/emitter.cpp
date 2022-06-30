@@ -115,6 +115,13 @@ void IREmitter::UpdateQ(
   Push<IRUpdateSticky>(result, input);
 }
 
+void IREmitter::UpdateGE(
+  IRVariable const& result,
+  IRVariable const& input
+) {
+  Push<IRUpdateGE>(result, input);
+}
+
 void IREmitter::LSL(
   IRVariable const& result,
   IRVariable const& operand,
@@ -380,7 +387,6 @@ void IREmitter::QSUB(
   Push<IRSaturatingSub>(result, lhs, rhs);
 }
 
-
 void IREmitter::MRC(
   IRVariable const& result,
   int coprocessor_id,
@@ -401,6 +407,150 @@ void IREmitter::MCR(
   int opcode2
 ) {
   Push<IRWriteCoprocessorRegister>(value, coprocessor_id, opcode1, cn, cm, opcode2);
+}
+
+void IREmitter::PADDS8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddS8>(result, lhs, rhs);
+}
+
+void IREmitter::PADDU8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddU8>(result, lhs, rhs);
+}
+
+void IREmitter::PADDS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddS16>(result, lhs, rhs);
+}
+
+void IREmitter::PADDU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelAddU16>(result, lhs, rhs);
+}
+
+void IREmitter::PSUBS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSubS16>(result, lhs, rhs);
+}
+
+void IREmitter::PSUBU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSubU16>(result, lhs, rhs);
+}
+
+void IREmitter::PQADDS8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateAddS8>(result, lhs, rhs);
+}
+
+void IREmitter::PQADDU8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateAddU8>(result, lhs, rhs);
+}
+
+void IREmitter::PQADDS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateAddS16>(result, lhs, rhs);
+}
+
+void IREmitter::PQADDU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateAddU16>(result, lhs, rhs);
+}
+
+void IREmitter::PQSUBS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateSubS16>(result, lhs, rhs);
+}
+
+void IREmitter::PQSUBU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelSaturateSubU16>(result, lhs, rhs);
+}
+
+void IREmitter::PHADDS8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingAddS8>(result, lhs, rhs);
+}
+
+void IREmitter::PHADDU8(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingAddU8>(result, lhs, rhs);
+}
+
+void IREmitter::PHADDS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingAddS16>(result, lhs, rhs);
+}
+
+void IREmitter::PHADDU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingAddU16>(result, lhs, rhs);
+}
+
+void IREmitter::PHSUBS16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingSubS16>(result, lhs, rhs);
+}
+
+void IREmitter::PHSUBU16(
+  IRVariable const& result,
+  IRVariable const& lhs,
+  IRVariable const& rhs
+) {
+  Push<IRParallelHalvingSubU16>(result, lhs, rhs);
 }
 
 } // namespace lunatic::frontend

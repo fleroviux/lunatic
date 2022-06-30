@@ -65,7 +65,8 @@ struct CPU {
     u32 exception_base = 0;
     enum class Model {
       ARM7,
-      ARM9
+      ARM9,
+      ARM11MP
     } model = Model::ARM9;
     int block_size = 32;
   };

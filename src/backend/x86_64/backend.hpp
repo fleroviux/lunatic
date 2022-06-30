@@ -82,6 +82,7 @@ private:
   void CompileSetCarry(CompileContext const& context, IRSetCarry* op);
   void CompileUpdateFlags(CompileContext const& context, IRUpdateFlags* op);
   void CompileUpdateSticky(CompileContext const& context, IRUpdateSticky* op);
+  void CompileUpdateGE(CompileContext const& context, IRUpdateGE* op);
   void CompileLSL(CompileContext const& context, IRLogicalShiftLeft* op);
   void CompileLSR(CompileContext const& context, IRLogicalShiftRight* op);
   void CompileASR(CompileContext const& context, IRArithmeticShiftRight* op);
@@ -109,6 +110,24 @@ private:
   void CompileFlushExchange(CompileContext const& context, IRFlushExchange* op);
   void CompileMRC(CompileContext const& context, IRReadCoprocessorRegister* op);
   void CompileMCR(CompileContext const& context, IRWriteCoprocessorRegister* op);
+  void CompilePADDS8(CompileContext const& context, IRParallelAddS8* op);
+  void CompilePADDU8(CompileContext const& context, IRParallelAddU8* op);
+  void CompilePADDS16(CompileContext const& context, IRParallelAddS16* op);
+  void CompilePADDU16(CompileContext const& context, IRParallelAddU16* op);
+  void CompilePSUBS16(CompileContext const& context, IRParallelSubS16* op);
+  void CompilePSUBU16(CompileContext const& context, IRParallelSubU16* op);
+  void CompilePQADDS8(CompileContext const& context, IRParallelSaturateAddS8* op);
+  void CompilePQADDU8(CompileContext const& context, IRParallelSaturateAddU8* op);
+  void CompilePQADDS16(CompileContext const& context, IRParallelSaturateAddS16* op);
+  void CompilePQADDU16(CompileContext const& context, IRParallelSaturateAddU16* op);
+  void CompilePQSUBS16(CompileContext const& context, IRParallelSaturateSubS16* op);
+  void CompilePQSUBU16(CompileContext const& context, IRParallelSaturateSubU16* op);
+  void CompilePHADDS8(CompileContext const& context, IRParallelHalvingAddS8* op);
+  void CompilePHADDU8(CompileContext const& context, IRParallelHalvingAddU8* op);
+  void CompilePHADDS16(CompileContext const& context, IRParallelHalvingAddS16* op);
+  void CompilePHADDU16(CompileContext const& context, IRParallelHalvingAddU16* op);
+  void CompilePHSUBS16(CompileContext const& context, IRParallelHalvingSubS16* op);
+  void CompilePHSUBU16(CompileContext const& context, IRParallelHalvingSubU16* op);
 
   Memory& memory;
   State& state;

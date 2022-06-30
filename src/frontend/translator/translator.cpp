@@ -14,8 +14,13 @@ Translator::Translator(CPU::Descriptor const& descriptor)
     : armv5te(descriptor.model == CPU::Descriptor::Model::ARM9)
     , max_block_size(descriptor.block_size)
     , exception_base(descriptor.exception_base)
+    , cpu_model(descriptor.model)
     , memory(descriptor.memory)
     , coprocessors(descriptor.coprocessors) {
+  // TODO: properly handle this in the future.
+  if (descriptor.model == CPU::Descriptor::Model::ARM11MP) {
+    armv5te = true;
+  }
 }
 
 void Translator::Translate(BasicBlock& basic_block) {
@@ -63,7 +68,7 @@ void Translator::TranslateARM(BasicBlock& basic_block) {
       break_micro_block(condition);
     }
 
-    auto status = decode_arm(instruction, *this);
+    auto status = decode_arm(cpu_model, instruction, *this);
 
     if (status == Status::Unimplemented) {
       throw std::runtime_error(
@@ -180,6 +185,15 @@ void Translator::EmitUpdateQ() {
 
   emitter->LoadCPSR(cpsr_in);
   emitter->UpdateQ(cpsr_out, cpsr_in);
+  emitter->StoreCPSR(cpsr_out);
+}
+
+void Translator::EmitUpdateGE() {
+  auto& cpsr_in  = emitter->CreateVar(IRDataType::UInt32, "cpsr_in");
+  auto& cpsr_out = emitter->CreateVar(IRDataType::UInt32, "cpsr_out");
+
+  emitter->LoadCPSR(cpsr_in);
+  emitter->UpdateGE(cpsr_out, cpsr_in);
   emitter->StoreCPSR(cpsr_out);
 }
 

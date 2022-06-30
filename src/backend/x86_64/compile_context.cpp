@@ -13,7 +13,7 @@ void X64Backend::CompileLoadGPR(CompileContext const& context, IRLoadGPR* op) {
   DESTRUCTURE_CONTEXT;
 
   auto address  = rcx + state.GetOffsetToGPR(op->reg.mode, op->reg.reg);
-  auto host_reg = reg_alloc.GetVariableHostReg(op->result.Get());
+  auto host_reg = reg_alloc.GetVariableGPR(op->result.Get());
 
   code.mov(host_reg, dword[address]);
 }
@@ -26,7 +26,7 @@ void X64Backend::CompileStoreGPR(CompileContext const& context, IRStoreGPR* op) 
   if (op->value.IsConstant()) {
     code.mov(dword[address], op->value.GetConst().value);
   } else {
-    auto host_reg = reg_alloc.GetVariableHostReg(op->value.GetVar());
+    auto host_reg = reg_alloc.GetVariableGPR(op->value.GetVar());
 
     code.mov(dword[address], host_reg);
   }
@@ -36,7 +36,7 @@ void X64Backend::CompileLoadSPSR(CompileContext const& context, IRLoadSPSR* op) 
   DESTRUCTURE_CONTEXT;
 
   auto address = rcx + state.GetOffsetToSPSR(op->mode);
-  auto host_reg = reg_alloc.GetVariableHostReg(op->result.Get());
+  auto host_reg = reg_alloc.GetVariableGPR(op->result.Get());
 
   code.mov(host_reg, dword[address]);
 }
@@ -49,7 +49,7 @@ void X64Backend::CompileStoreSPSR(const CompileContext &context, IRStoreSPSR *op
   if (op->value.IsConstant()) {
     code.mov(dword[address], op->value.GetConst().value);
   } else {
-    auto host_reg = reg_alloc.GetVariableHostReg(op->value.GetVar());
+    auto host_reg = reg_alloc.GetVariableGPR(op->value.GetVar());
 
     code.mov(dword[address], host_reg);
   }
@@ -59,7 +59,7 @@ void X64Backend::CompileLoadCPSR(CompileContext const& context, IRLoadCPSR* op) 
   DESTRUCTURE_CONTEXT;
 
   auto address = rcx + state.GetOffsetToCPSR();
-  auto host_reg = reg_alloc.GetVariableHostReg(op->result.Get());
+  auto host_reg = reg_alloc.GetVariableGPR(op->result.Get());
 
   code.mov(host_reg, dword[address]);
 }
@@ -72,7 +72,7 @@ void X64Backend::CompileStoreCPSR(CompileContext const& context, IRStoreCPSR* op
   if (op->value.IsConstant()) {
     code.mov(dword[address], op->value.GetConst().value);
   } else {
-    auto host_reg = reg_alloc.GetVariableHostReg(op->value.GetVar());
+    auto host_reg = reg_alloc.GetVariableGPR(op->value.GetVar());
 
     code.mov(dword[address], host_reg);
   }

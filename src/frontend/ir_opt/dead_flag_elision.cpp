@@ -14,7 +14,7 @@ namespace frontend {
 void IRDeadFlagElisionPass::Run(IREmitter& emitter) {
   /**
    * TODO:
-   * a) implement the same logic for the Q-flag (update.q)
+   * a) implement the same logic for the Q-flag (update.q) and GE-flags (update.ge)
    * b) when we remove an update.nzcv opcode, turn ADDS into ADD (for example).
    *    - careful: ADC might still want to read the C-flag from that ADDS operation.
    */

@@ -332,10 +332,13 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::StoreSPSR: CompileStoreSPSR(context, lunatic_cast<IRStoreSPSR>(op.get())); break;
     case IROpcodeClass::LoadCPSR: CompileLoadCPSR(context, lunatic_cast<IRLoadCPSR>(op.get())); break;
     case IROpcodeClass::StoreCPSR: CompileStoreCPSR(context, lunatic_cast<IRStoreCPSR>(op.get())); break;
+
+    // Processor flags (compile_flags.cpp)
     case IROpcodeClass::ClearCarry: CompileClearCarry(context, lunatic_cast<IRClearCarry>(op.get())); break;
     case IROpcodeClass::SetCarry:   CompileSetCarry(context, lunatic_cast<IRSetCarry>(op.get())); break;
     case IROpcodeClass::UpdateFlags: CompileUpdateFlags(context, lunatic_cast<IRUpdateFlags>(op.get())); break;
     case IROpcodeClass::UpdateSticky: CompileUpdateSticky(context, lunatic_cast<IRUpdateSticky>(op.get())); break;
+    case IROpcodeClass::UpdateGE: CompileUpdateGE(context, lunatic_cast<IRUpdateGE>(op.get())); break;
     
     // Barrel shifter (compile_shift.cpp)
     case IROpcodeClass::LSL: CompileLSL(context, lunatic_cast<IRLogicalShiftLeft>(op.get())); break;
@@ -376,6 +379,26 @@ void X64Backend::CompileIROp(
     case IROpcodeClass::MRC: CompileMRC(context, lunatic_cast<IRReadCoprocessorRegister>(op.get())); break;
     case IROpcodeClass::MCR: CompileMCR(context, lunatic_cast<IRWriteCoprocessorRegister>(op.get())); break;
 
+    // SIMD (media instructions)
+    case IROpcodeClass::PADDS8: CompilePADDS8(context, lunatic_cast<IRParallelAddS8>(op.get())); break;
+    case IROpcodeClass::PADDU8: CompilePADDU8(context, lunatic_cast<IRParallelAddU8>(op.get())); break;
+    case IROpcodeClass::PADDS16: CompilePADDS16(context, lunatic_cast<IRParallelAddS16>(op.get())); break;
+    case IROpcodeClass::PADDU16: CompilePADDU16(context, lunatic_cast<IRParallelAddU16>(op.get())); break;
+    case IROpcodeClass::PSUBS16: CompilePSUBS16(context, lunatic_cast<IRParallelSubS16>(op.get())); break;
+    case IROpcodeClass::PSUBU16: CompilePSUBU16(context, lunatic_cast<IRParallelSubU16>(op.get())); break;
+    case IROpcodeClass::PQADDS8: CompilePQADDS8(context, lunatic_cast<IRParallelSaturateAddS8>(op.get())); break;
+    case IROpcodeClass::PQADDU8: CompilePQADDU8(context, lunatic_cast<IRParallelSaturateAddU8>(op.get())); break;
+    case IROpcodeClass::PQADDS16: CompilePQADDS16(context, lunatic_cast<IRParallelSaturateAddS16>(op.get())); break;
+    case IROpcodeClass::PQADDU16: CompilePQADDU16(context, lunatic_cast<IRParallelSaturateAddU16>(op.get())); break;
+    case IROpcodeClass::PQSUBS16: CompilePQSUBS16(context, lunatic_cast<IRParallelSaturateSubS16>(op.get())); break;
+    case IROpcodeClass::PQSUBU16: CompilePQSUBU16(context, lunatic_cast<IRParallelSaturateSubU16>(op.get())); break;
+    case IROpcodeClass::PHADDS8: CompilePHADDS8(context, lunatic_cast<IRParallelHalvingAddS8>(op.get())); break;
+    case IROpcodeClass::PHADDU8: CompilePHADDU8(context, lunatic_cast<IRParallelHalvingAddU8>(op.get())); break;
+    case IROpcodeClass::PHADDS16: CompilePHADDS16(context, lunatic_cast<IRParallelHalvingAddS16>(op.get())); break;
+    case IROpcodeClass::PHADDU16: CompilePHADDU16(context, lunatic_cast<IRParallelHalvingAddU16>(op.get())); break;
+    case IROpcodeClass::PHSUBS16: CompilePHSUBS16(context, lunatic_cast<IRParallelHalvingSubS16>(op.get())); break;
+    case IROpcodeClass::PHSUBU16: CompilePHSUBU16(context, lunatic_cast<IRParallelHalvingSubU16>(op.get())); break;
+
     default: {
       throw std::runtime_error(
         fmt::format("lunatic: unhandled IR opcode: {}", op->ToString())
@@ -411,7 +434,7 @@ auto X64Backend::GetUsedHostRegsFromList(
   auto regs_used = std::vector<Xbyak::Reg64>{};
 
   for (auto reg : regs) {
-    if (!reg_alloc.IsHostRegFree(reg)) {
+    if (!reg_alloc.IsGPRFree(reg)) {
       regs_used.push_back(reg);
     }
   }

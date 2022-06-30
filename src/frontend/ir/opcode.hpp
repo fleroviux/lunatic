@@ -28,6 +28,7 @@ enum class IROpcodeClass {
   SetCarry,
   UpdateFlags,
   UpdateSticky,
+  UpdateGE,
   LSL,
   LSR,
   ASR,
@@ -54,7 +55,25 @@ enum class IROpcodeClass {
   QADD,
   QSUB,
   MRC,
-  MCR
+  MCR,
+  PADDS8,
+  PADDU8,
+  PADDS16,
+  PADDU16,
+  PSUBS16,
+  PSUBU16,
+  PQADDS8,
+  PQADDU8,
+  PQADDS16,
+  PQADDU16,
+  PQSUBS16,
+  PQSUBU16,
+  PHADDS8,
+  PHADDU8,
+  PHADDS16,
+  PHADDU16,
+  PHSUBS16,
+  PHSUBU16
 };
 
 // TODO: Reads(), Writes() and ToString() should be const,
@@ -390,6 +409,40 @@ struct IRUpdateSticky final : IROpcodeBase<IROpcodeClass::UpdateSticky> {
   auto ToString() -> std::string override {
     return fmt::format(
       "update.q {}, {}",
+      std::to_string(result),
+      std::to_string(input)
+    );
+  }
+};
+
+struct IRUpdateGE final : IROpcodeBase<IROpcodeClass::UpdateGE> {
+  IRUpdateGE(
+    IRVariable const& result,
+    IRVariable const& input
+  )   : result(result), input(input) {}
+
+  IRVarRef result;
+  IRVarRef input;
+
+  auto Reads(IRVariable const& var) -> bool override {
+    return &input.Get() == &var;
+  }
+
+  auto Writes(IRVariable const& var) -> bool override {
+    return &result.Get() == &var;
+  }
+
+  void Repoint(
+    IRVariable const& var_old,
+    IRVariable const& var_new
+  ) override {
+    result.Repoint(var_old, var_new);
+    input.Repoint(var_old, var_new);
+  }
+
+  auto ToString() -> std::string override {
+    return fmt::format(
+      "update.ge {}, {}",
       std::to_string(result),
       std::to_string(input)
     );
@@ -1278,6 +1331,195 @@ struct IRWriteCoprocessorRegister final : IROpcodeBase<IROpcodeClass::MCR> {
       cm,
       opcode2
     );
+  }
+};
+
+template<IROpcodeClass _klass>
+struct IRParallelAddSubBase : IROpcodeBase<_klass> {
+  IRParallelAddSubBase(
+    IRVariable const& result,
+    IRVariable const& lhs,
+    IRVariable const& rhs
+  )   : result(result)
+      , lhs(lhs)
+      , rhs(rhs) {
+  }
+
+  IRVarRef result;
+  IRVarRef lhs;
+  IRVarRef rhs;
+
+  auto Reads(IRVariable const& var) -> bool override {
+    return &var == &lhs.Get() || &var == &rhs.Get();
+  }
+
+  auto Writes(IRVariable const& var) -> bool override {
+    return &var == &result.Get();
+  }
+
+  void Repoint(
+    IRVariable const& var_old,
+    IRVariable const& var_new
+  ) override {
+    result.Repoint(var_old, var_new);
+    lhs.Repoint(var_old, var_new);
+    rhs.Repoint(var_old, var_new);
+  }
+
+protected:
+  auto ToString(const char* mnemonic) -> std::string {
+    return fmt::format(
+      "{} {}, {}, {}",
+      mnemonic,
+      std::to_string(result),
+      std::to_string(lhs),
+      std::to_string(rhs)
+    );
+  }
+};
+
+struct IRParallelAddS8 final : IRParallelAddSubBase<IROpcodeClass::PADDS8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("sadd8");
+  }
+};
+
+struct IRParallelAddU8 final : IRParallelAddSubBase<IROpcodeClass::PADDU8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uadd8");
+  }
+};
+
+struct IRParallelAddS16 final : IRParallelAddSubBase<IROpcodeClass::PADDS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("sadd16");
+  }
+};
+
+struct IRParallelAddU16 final : IRParallelAddSubBase<IROpcodeClass::PADDU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uadd16");
+  }
+};
+
+struct IRParallelSubS16 final : IRParallelAddSubBase<IROpcodeClass::PSUBS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("ssub16");
+  }
+};
+
+struct IRParallelSubU16 final : IRParallelAddSubBase<IROpcodeClass::PSUBU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("usub16");
+  }
+};
+
+struct IRParallelSaturateAddS8 final : IRParallelAddSubBase<IROpcodeClass::PQADDS8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("qadd8");
+  }
+};
+
+struct IRParallelSaturateAddU8 final : IRParallelAddSubBase<IROpcodeClass::PQADDU8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uqadd8");
+  }
+};
+
+
+struct IRParallelSaturateAddS16 final : IRParallelAddSubBase<IROpcodeClass::PQADDS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("qadd16");
+  }
+};
+
+struct IRParallelSaturateAddU16 final : IRParallelAddSubBase<IROpcodeClass::PQADDU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uqadd16");
+  }
+};
+
+struct IRParallelSaturateSubS16 final : IRParallelAddSubBase<IROpcodeClass::PQSUBS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("qsub16");
+  }
+};
+
+struct IRParallelSaturateSubU16 final : IRParallelAddSubBase<IROpcodeClass::PQSUBU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uqsub16");
+  }
+};
+
+struct IRParallelHalvingAddS8 final : IRParallelAddSubBase<IROpcodeClass::PHADDS8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("shadd8");
+  }
+};
+
+struct IRParallelHalvingAddU8 final : IRParallelAddSubBase<IROpcodeClass::PHADDU8> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uhadd8");
+  }
+};
+
+struct IRParallelHalvingAddS16 final : IRParallelAddSubBase<IROpcodeClass::PHADDS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("shadd16");
+  }
+};
+
+struct IRParallelHalvingAddU16 final : IRParallelAddSubBase<IROpcodeClass::PHADDU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uhadd16");
+  }
+};
+
+struct IRParallelHalvingSubS16 final : IRParallelAddSubBase<IROpcodeClass::PHSUBS16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("shsub16");
+  }
+};
+
+struct IRParallelHalvingSubU16 final : IRParallelAddSubBase<IROpcodeClass::PHSUBU16> {
+  using IRParallelAddSubBase::IRParallelAddSubBase;
+
+  auto ToString() -> std::string override {
+    return IRParallelAddSubBase::ToString("uhsub16");
   }
 };
 

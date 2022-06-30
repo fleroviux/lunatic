@@ -48,6 +48,7 @@ struct Translator final : ARMDecodeClient<Status> {
   auto Handle(ARMSignedWordHalfwordMultiply const& opcode) -> Status override;
   auto Handle(ARMSignedHalfwordMultiplyAccumulateLong const& opcode) -> Status override;
   auto Handle(ThumbBranchLinkSuffix const& opcode) -> Status override;
+  auto Handle(ARMParallelAddSub const& opcode) -> Status override;
   auto Undefined(u32 opcode) -> Status override;
 
 private:
@@ -58,6 +59,7 @@ private:
   void EmitUpdateNZC();
   void EmitUpdateNZCV();
   void EmitUpdateQ();
+  void EmitUpdateGE();
   void EmitAdvancePC();
   void EmitFlush();
   void EmitFlushExchange(IRVariable const& address);
@@ -72,6 +74,7 @@ private:
   bool armv5te;
   int  max_block_size;
   u32  exception_base;
+  CPU::Descriptor::Model cpu_model;
   Memory& memory;
   std::array<Coprocessor*, 16> coprocessors;
   IREmitter* emitter = nullptr;
