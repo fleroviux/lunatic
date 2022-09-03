@@ -14,6 +14,10 @@ namespace frontend {
 
 struct IRDeadFlagElisionPass final : IRPass {
   void Run(IREmitter& emitter) override;
+
+private:
+  void RemoveRedundantUpdateFlagsOpcodes(IREmitter& emitter);
+  void DisableRedundantFlagCalculations(IREmitter& emitter);
 };
 
 } // namespace lunatic::frontend

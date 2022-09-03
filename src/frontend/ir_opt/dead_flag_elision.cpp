@@ -12,6 +12,11 @@ namespace lunatic {
 namespace frontend {
 
 void IRDeadFlagElisionPass::Run(IREmitter& emitter) {
+  RemoveRedundantUpdateFlagsOpcodes(emitter);
+  DisableRedundantFlagCalculations(emitter);
+}
+
+void IRDeadFlagElisionPass::RemoveRedundantUpdateFlagsOpcodes(IREmitter& emitter) {
   /**
    * TODO:
    * a) implement the same logic for the Q-flag (update.q)
@@ -73,6 +78,144 @@ void IRDeadFlagElisionPass::Run(IREmitter& emitter) {
           unused_c = false;
           unused_v = false;
           current_cpsr_in = {};
+        }
+        break;
+      }
+    }
+
+    ++it;
+  }
+}
+
+void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter) {
+  auto& code = emitter.Code();
+  auto it = code.rbegin();
+  auto end = code.rend();
+
+  bool used_n = false;
+  bool used_z = false;
+  bool used_c = false;
+  bool used_v = false;
+
+  while (it != end) {
+    auto op_class = it->get()->GetClass();
+
+    switch (op_class) {
+      case IROpcodeClass::UpdateFlags: {
+        auto op = lunatic_cast<IRUpdateFlags>(it->get());
+
+        if (op->flag_n) used_n = true;
+        if (op->flag_z) used_z = true;
+        if (op->flag_c) used_c = true;
+        if (op->flag_v) used_v = true;
+        break;
+      }
+      case IROpcodeClass::UpdateSticky: {
+        used_v = true; // Q-flag is kept in the host V-flag
+        break;
+      }
+      case IROpcodeClass::ClearCarry:
+      case IROpcodeClass::SetCarry: {
+        if (!used_c) {
+          *it = std::make_unique<IRNoOp>();
+        }
+        used_c = false;
+        break;
+      }
+      case IROpcodeClass::LSL:
+      case IROpcodeClass::LSR:
+      case IROpcodeClass::ASR:
+      case IROpcodeClass::ROR: {
+        auto op = (IRLogicalShiftLeft*)it->get();
+
+        if (!used_c) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_c = false;
+        }
+
+        // Special case: RRX #1 (encoded as ROR #0) reads the carry flag.
+        if (op_class == IROpcodeClass::ROR && op->amount.IsConstant() && op->amount.GetConst().value == 0) {
+          used_c = true;
+        }
+        break;
+      }
+      case IROpcodeClass::AND:
+      case IROpcodeClass::BIC:
+      case IROpcodeClass::EOR:
+      case IROpcodeClass::ORR: {
+        auto op = (IRBitwiseAND*)it->get();
+
+        if (!used_n && !used_z) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
+        }
+        break;
+      }
+      case IROpcodeClass::ADD:
+      case IROpcodeClass::SUB:
+      case IROpcodeClass::RSB: {
+        auto op = (IRAdd*)it->get();
+
+        if (!used_n && !used_z && !used_c && !used_v) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
+          used_c = false;
+          used_v = false;
+        }
+        break;
+      }
+      case IROpcodeClass::ADC:
+      case IROpcodeClass::SBC:
+      case IROpcodeClass::RSC: {
+        auto op = (IRAdc*)it->get();
+
+        if (!used_n && !used_z && !used_v) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
+          used_v = false;
+        }
+
+        used_c = true;
+        break;
+      }
+      case IROpcodeClass::MOV:
+      case IROpcodeClass::MVN: {
+        auto op = (IRMov*)it->get();
+
+        if (!used_n && !used_z) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
+        }
+        break;
+      }
+      case IROpcodeClass::MUL: {
+        auto op = lunatic_cast<IRMultiply>(it->get());
+
+        if (!used_n && !used_z) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
+        }
+        break;
+      }
+      case IROpcodeClass::ADD64: {
+        auto op = lunatic_cast<IRAdd64>(it->get());
+
+        if (!used_n && !used_z) {
+          op->update_host_flags = false;
+        } else if (op->update_host_flags) {
+          used_n = false;
+          used_z = false;
         }
         break;
       }
