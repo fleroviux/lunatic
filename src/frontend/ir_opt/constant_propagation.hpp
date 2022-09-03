@@ -14,9 +14,6 @@ namespace frontend {
 
 struct IRConstantPropagationPass final : IRPass {
   void Run(IREmitter& emitter) override;
-
-private:
-  //void Propagate(IREmitter& emitter, IRVariable const& var, IRConstant const& constant);
 };
 
 } // namespace lunatic::frontend

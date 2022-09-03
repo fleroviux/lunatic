@@ -971,7 +971,7 @@ struct IRMemoryRead final : IROpcodeBase<IROpcodeClass::MemoryRead> {
   IRMemoryRead(
     IRMemoryFlags flags,
     IRVariable const& result,
-    IRVariable const& address
+    IRAnyRef address
   )   : flags(flags)
       , result(result)
       , address(address) {
@@ -979,10 +979,10 @@ struct IRMemoryRead final : IROpcodeBase<IROpcodeClass::MemoryRead> {
 
   IRMemoryFlags flags;
   IRVarRef result;
-  IRVarRef address;
+  IRAnyRef address;
 
   auto Reads(IRVariable const& var) -> bool override {
-    return &address.Get() == &var;
+    return address.IsVariable() && (&address.GetVar() == &var);
   }
 
   auto Writes(IRVariable const& var) -> bool override {
@@ -995,6 +995,13 @@ struct IRMemoryRead final : IROpcodeBase<IROpcodeClass::MemoryRead> {
   ) override {
     result.Repoint(var_old, var_new);
     address.Repoint(var_old, var_new);
+  }
+
+  void PropagateConstant(
+    IRVariable const& var,
+    IRConstant const& constant
+  ) override {
+    address.PropagateConstant(var, constant);
   }
 
   auto ToString() -> std::string override {
@@ -1016,19 +1023,20 @@ struct IRMemoryRead final : IROpcodeBase<IROpcodeClass::MemoryRead> {
 struct IRMemoryWrite final : IROpcodeBase<IROpcodeClass::MemoryWrite> {
   IRMemoryWrite(
     IRMemoryFlags flags,
-    IRVariable const& source,
-    IRVariable const& address
+    IRAnyRef source,
+    IRAnyRef address
   )   : flags(flags)
       , source(source)
       , address(address) {
   }
 
   IRMemoryFlags flags;
-  IRVarRef source;
-  IRVarRef address;
+  IRAnyRef source;
+  IRAnyRef address;
 
   auto Reads(IRVariable const& var) -> bool override {
-    return &address.Get() == &var || &source.Get() == &var;
+    return (address.IsVariable() && (&address.GetVar() == &var)) ||
+           (source.IsVariable()  && (&source.GetVar()  == &var));
   }
 
   auto Writes(IRVariable const& var) -> bool override {
@@ -1041,6 +1049,14 @@ struct IRMemoryWrite final : IROpcodeBase<IROpcodeClass::MemoryWrite> {
   ) override {
     source.Repoint(var_old, var_new);
     address.Repoint(var_old, var_new);
+  }
+
+  void PropagateConstant(
+    IRVariable const& var,
+    IRConstant const& constant
+  ) override {
+    source.PropagateConstant(var, constant);
+    address.PropagateConstant(var, constant);
   }
 
   auto ToString() -> std::string override {

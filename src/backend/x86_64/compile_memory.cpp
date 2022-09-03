@@ -12,8 +12,17 @@ namespace lunatic::backend {
 void X64Backend::CompileMemoryRead(CompileContext const& context, IRMemoryRead* op) {
   DESTRUCTURE_CONTEXT;
 
+  Xbyak::Reg32 address_reg;
+  auto& address = op->address;
+
+  if (address.IsVariable()) {
+    address_reg = reg_alloc.GetVariableHostReg(address.GetVar());
+  } else {
+    address_reg = reg_alloc.GetTemporaryHostReg();
+    code.mov(address_reg, address.GetConst().value);
+  }
+
   auto result_reg = reg_alloc.GetVariableHostReg(op->result.Get());
-  auto address_reg = reg_alloc.GetVariableHostReg(op->address.Get());
   auto flags = op->flags;
 
   auto label_slowmem = Xbyak::Label{};
@@ -252,8 +261,26 @@ void X64Backend::CompileMemoryRead(CompileContext const& context, IRMemoryRead* 
 void X64Backend::CompileMemoryWrite(CompileContext const& context, IRMemoryWrite* op) {
   DESTRUCTURE_CONTEXT;
 
-  auto source_reg  = reg_alloc.GetVariableHostReg(op->source.Get());
-  auto address_reg = reg_alloc.GetVariableHostReg(op->address.Get());
+  Xbyak::Reg32 source_reg;
+  auto& source = op->source;
+
+  if (source.IsVariable()) {
+    source_reg = reg_alloc.GetVariableHostReg(source.GetVar());
+  } else {
+    source_reg = reg_alloc.GetTemporaryHostReg();
+    code.mov(source_reg, source.GetConst().value);
+  }
+
+  Xbyak::Reg32 address_reg;
+  auto& address = op->address;
+
+  if (address.IsVariable()) {
+    address_reg = reg_alloc.GetVariableHostReg(address.GetVar());
+  } else {
+    address_reg = reg_alloc.GetTemporaryHostReg();
+    code.mov(address_reg, address.GetConst().value);
+  }
+
   auto scratch_reg = reg_alloc.GetTemporaryHostReg();
   auto flags = op->flags;
 
