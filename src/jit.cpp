@@ -156,6 +156,9 @@ private:
       for (auto& pass : passes) {
         pass->Run(micro_block.emitter);
       }
+
+      fmt::print("----------------------------------------------\n");
+      fmt::print("{}\n", micro_block.emitter.ToString());
     }
   }
 

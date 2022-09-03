@@ -324,6 +324,8 @@ void X64Backend::CompileIROp(
   std::unique_ptr<IROpcode> const& op
 ) {
   switch (op->GetClass()) {
+    case IROpcodeClass::NOP: break;
+
     // Context access (compile_context.cpp)
     case IROpcodeClass::LoadGPR: CompileLoadGPR(context, lunatic_cast<IRLoadGPR>(op.get())); break;
     case IROpcodeClass::StoreGPR: CompileStoreGPR(context, lunatic_cast<IRStoreGPR>(op.get())); break;

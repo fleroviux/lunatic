@@ -38,7 +38,15 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
     return var_to_const[var.Get().id];
   };
 
-  for (auto const& op : emitter.Code()) {
+  const auto MOV = [](IRVariable const& result, IRConstant const& constant, bool update_host_flags = false) {
+    return std::make_unique<IRMov>(result, constant, update_host_flags);
+  };
+
+  const auto NOP = []() {
+    return std::make_unique<IRNoOp>();
+  };
+
+  for (auto& op : emitter.Code()) {
     const auto op_class = op->GetClass();
 
     switch (op_class) {
@@ -55,6 +63,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
       case IROpcodeClass::LSL: {
         const auto lsl = (IRLogicalShiftLeft*)op.get();
 
+        auto& result = lsl->result.Get();
         auto& operand = GetKnownConstant(lsl->operand);
         auto& amount = lsl->amount;
 
@@ -63,13 +72,18 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
           IRConstant constant = shift_amount >= 32 ? 0 : (operand.Unwrap().value << shift_amount);
 
           p(op);
-          Propagate(lsl->result.Get(), constant);
+          Propagate(result, constant);
+
+          if (!lsl->update_host_flags) {
+            op = MOV(result, constant);
+          }
         }
         break;
       }
       case IROpcodeClass::LSR: {
         const auto lsr = (IRLogicalShiftRight*)op.get();
 
+        auto& result = lsr->result.Get();
         auto& operand = GetKnownConstant(lsr->operand);
         auto& amount = lsr->amount;
 
@@ -78,13 +92,18 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
           IRConstant constant = (shift_amount == 0 || shift_amount >= 32) ? 0 : (operand.Unwrap().value >> shift_amount);
 
           p(op);
-          Propagate(lsr->result.Get(), constant);
+          Propagate(result, constant);
+
+          if (!lsr->update_host_flags) {
+            op = MOV(result, constant);
+          }
         }
         break;
       }
       case IROpcodeClass::ASR: {
         const auto asr = (IRArithmeticShiftRight*)op.get();
 
+        auto& result = asr->result.Get();
         auto& operand = GetKnownConstant(asr->operand);
         auto& amount = asr->amount;
 
@@ -99,13 +118,18 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
           IRConstant constant = (u32)((s32)operand_value >> shift_amount);
 
           p(op);
-          Propagate(asr->result.Get(), constant);
+          Propagate(result, constant);
+
+          if (!asr->update_host_flags) {
+            op = MOV(result, constant);
+          }
         }
         break;
       }
       case IROpcodeClass::ROR: {
         const auto ror = (IRRotateRight*)op.get();
 
+        auto& result = ror->result.Get();
         auto& operand = GetKnownConstant(ror->operand);
         auto& amount = ror->amount;
 
@@ -121,6 +145,10 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
 
           p(op);
           Propagate(ror->result.Get(), constant);
+
+          if (!ror->update_host_flags) {
+            op = MOV(result, constant);
+          }
         }
         break;
       }
@@ -136,7 +164,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
         auto& lhs = GetKnownConstant(add->lhs);
         auto& rhs = add->rhs;
 
-        if (result.HasValue() && lhs.HasValue() && rhs.IsConstant()) {
+        if (lhs.HasValue() && rhs.IsConstant()) {
           IRConstant constant;
 
           u32 lhs_value = lhs.Unwrap().value;
@@ -151,8 +179,26 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
             case IROpcodeClass::ORR: constant = lhs_value |  rhs_value; break;
           }
 
-          p(op);
-          Propagate(result.Unwrap(), constant);
+          if (result.HasValue()) {
+            p(op);
+            Propagate(result.Unwrap(), constant);
+          }
+
+          bool update_host_flags = add->update_host_flags;
+
+          // Attempt to replace opcode with a MOV (removes dependencies on operand variables)
+          if (result.HasValue()) {
+            if (op_class == IROpcodeClass::ADD || op_class == IROpcodeClass::SUB) {
+              if (!update_host_flags) {
+                op = MOV(result.Unwrap(), constant, false);
+              }
+            } else {
+              // AND, BIC, EOR, ORR
+              op = MOV(result.Unwrap(), constant, update_host_flags);
+            }
+          } else if (!update_host_flags) {
+            op = NOP();
+          }
         }
 
         break;
@@ -187,6 +233,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
 
             p(op);
             Propagate(mul->result_lo.Get(), constant);
+            op = MOV(mul->result_lo.Get(), constant, mul->update_host_flags);
           }
         }
         break;

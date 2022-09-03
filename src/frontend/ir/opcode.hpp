@@ -18,6 +18,7 @@ namespace lunatic {
 namespace frontend {
 
 enum class IROpcodeClass {
+  NOP,
   LoadGPR,
   StoreGPR,
   LoadSPSR,
@@ -82,6 +83,26 @@ struct IROpcodeBase : IROpcode {
   static constexpr IROpcodeClass klass = _klass;
 
   auto GetClass() const -> IROpcodeClass override { return _klass; }
+};
+
+struct IRNoOp final : IROpcodeBase<IROpcodeClass::NOP> {
+  auto Reads(IRVariable const& var) -> bool override {
+    return false;
+  }
+
+  auto Writes(IRVariable const& var) -> bool override {
+    return false;
+  }
+
+  void Repoint(
+    IRVariable const& var_old,
+    IRVariable const& var_new
+  ) override {
+  }
+
+  auto ToString() -> std::string override {
+    return "nop";
+  }
 };
 
 struct IRLoadGPR final : IROpcodeBase<IROpcodeClass::LoadGPR> {
