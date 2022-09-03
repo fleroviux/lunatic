@@ -84,6 +84,40 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
 
         break;
       }
+      case IROpcodeClass::MUL: {
+        auto mul = (IRMultiply*)op.get();
+
+        auto& lhs = GetKnownConstant(mul->lhs.Get());
+        auto& rhs = GetKnownConstant(mul->rhs.Get());
+
+        if (lhs.HasValue() && rhs.HasValue()) {
+          if (mul->result_hi.HasValue()) {
+            if (mul->lhs.Get().data_type == IRDataType::SInt32) {
+              s64 result = (s64)(s32)lhs.Unwrap().value * (s64)(s32)rhs.Unwrap().value;
+              IRConstant constant_lo = (u32)result;
+              IRConstant constant_hi = (u32)(result >> 32);
+
+              p(op);
+              Propagate(mul->result_lo.Get(), constant_lo);
+              Propagate(mul->result_hi.Unwrap(), constant_hi);
+            } else {
+              u64 result = (u64)lhs.Unwrap().value * (u64)rhs.Unwrap().value;
+              IRConstant constant_lo = (u32)result;
+              IRConstant constant_hi = (u32)(result >> 32);
+
+              p(op);
+              Propagate(mul->result_lo.Get(), constant_lo);
+              Propagate(mul->result_hi.Unwrap(), constant_hi);
+            }
+          } else {
+            IRConstant constant = lhs.Unwrap().value * rhs.Unwrap().value;
+
+            p(op);
+            Propagate(mul->result_lo.Get(), constant);
+          }
+        }
+        break;
+      }
     }
   }
 

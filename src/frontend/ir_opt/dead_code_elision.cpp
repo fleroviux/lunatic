@@ -54,6 +54,18 @@ void IRDeadCodeElisionPass::Run(IREmitter& emitter) {
         }
         break;
       }
+      case IROpcodeClass::MUL: {
+        auto op = lunatic_cast<IRMultiply>(it->get());
+
+        if (!WillVarBeRead(op->result_lo.Get()) &&
+           (!op->result_hi.HasValue() || !WillVarBeRead(op->result_hi.Unwrap())) &&
+           !op->update_host_flags) {
+          fmt::print("removed: {}\n", op->ToString());
+          it = code.erase(it);
+          continue;
+        }
+        break;
+      }
     }
 
     switch (op_class) {
