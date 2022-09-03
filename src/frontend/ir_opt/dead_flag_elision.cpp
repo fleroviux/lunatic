@@ -219,6 +219,11 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
         }
         break;
       }
+      case IROpcodeClass::QADD:
+      case IROpcodeClass::QSUB: {
+        used_v = true;
+        break;
+      }
     }
 
     ++it;
