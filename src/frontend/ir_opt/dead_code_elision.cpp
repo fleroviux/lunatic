@@ -39,6 +39,19 @@ void IRDeadCodeElisionPass::Run(IREmitter& emitter) {
         }
         break;
       }
+      case IROpcodeClass::LSL:
+      case IROpcodeClass::LSR:
+      case IROpcodeClass::ASR:
+      case IROpcodeClass::ROR: {
+        auto op = (IRLogicalShiftLeft*)(it->get());
+
+        if (!WillVarBeRead(op->result.Get()) && !op->update_host_flags) {
+          it = code.erase(it);
+          fmt::print("removed: {}\n", op->ToString());
+          continue;
+        }
+        break;
+      }
       case IROpcodeClass::ADD:
       case IROpcodeClass::SUB:
       case IROpcodeClass::AND:

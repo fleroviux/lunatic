@@ -461,7 +461,9 @@ struct IRShifterBase : IROpcodeBase<_klass> {
     IRVariable const& var,
     IRConstant const& constant
   ) {
-    amount.PropagateConstant(var, constant);  
+    // TODO: this is unsafe, because shifter behaviour is different for
+    // shift-by-register vs shift-by-immediate instructions.
+    //amount.PropagateConstant(var, constant);
   }
 };
 

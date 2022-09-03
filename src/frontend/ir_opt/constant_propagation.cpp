@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "common/bit.hpp"
 #include "frontend/ir_opt/constant_propagation.hpp"
 
 namespace lunatic {
@@ -48,6 +49,78 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
         if (mov->source.IsConstant()) {
           p(op);
           Propagate(mov->result.Get(), mov->source.GetConst());
+        }
+        break;
+      }
+      case IROpcodeClass::LSL: {
+        const auto lsl = (IRLogicalShiftLeft*)op.get();
+
+        auto& operand = GetKnownConstant(lsl->operand);
+        auto& amount = lsl->amount;
+
+        if (operand.HasValue() && amount.IsConstant()) {
+          int shift_amount = amount.GetConst().value & 255;
+          IRConstant constant = shift_amount >= 32 ? 0 : (operand.Unwrap().value << shift_amount);
+
+          p(op);
+          Propagate(lsl->result.Get(), constant);
+        }
+        break;
+      }
+      case IROpcodeClass::LSR: {
+        const auto lsr = (IRLogicalShiftRight*)op.get();
+
+        auto& operand = GetKnownConstant(lsr->operand);
+        auto& amount = lsr->amount;
+
+        if (operand.HasValue() && amount.IsConstant()) {
+          int shift_amount = amount.GetConst().value & 255;
+          IRConstant constant = (shift_amount == 0 || shift_amount >= 32) ? 0 : (operand.Unwrap().value >> shift_amount);
+
+          p(op);
+          Propagate(lsr->result.Get(), constant);
+        }
+        break;
+      }
+      case IROpcodeClass::ASR: {
+        const auto asr = (IRArithmeticShiftRight*)op.get();
+
+        auto& operand = GetKnownConstant(asr->operand);
+        auto& amount = asr->amount;
+
+        if (operand.HasValue() && amount.IsConstant()) {
+          int shift_amount = amount.GetConst().value & 255;
+          u32 operand_value = operand.Unwrap().value;
+
+          if (shift_amount == 0 || shift_amount >= 32) {
+            shift_amount = 31;
+          }
+
+          IRConstant constant = (u32)((s32)operand_value >> shift_amount);
+
+          p(op);
+          Propagate(asr->result.Get(), constant);
+        }
+        break;
+      }
+      case IROpcodeClass::ROR: {
+        const auto ror = (IRRotateRight*)op.get();
+
+        auto& operand = GetKnownConstant(ror->operand);
+        auto& amount = ror->amount;
+
+        if (operand.HasValue() && amount.IsConstant()) {
+          int shift_amount = amount.GetConst().value;
+
+          if (shift_amount == 0) {
+            // RRX #1
+            break;
+          }
+
+          IRConstant constant = bit::rotate_right(operand.Unwrap().value, shift_amount & 31);
+
+          p(op);
+          Propagate(ror->result.Get(), constant);
         }
         break;
       }
