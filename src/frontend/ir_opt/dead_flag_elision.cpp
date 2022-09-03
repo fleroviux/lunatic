@@ -122,14 +122,14 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
         used_c = false;
         break;
       }
-      case IROpcodeClass::LSL:
+      /*case IROpcodeClass::LSL:
       case IROpcodeClass::LSR:
       case IROpcodeClass::ASR:
       case IROpcodeClass::ROR: {
         auto op = (IRLogicalShiftLeft*)it->get();
 
         if (!used_c) {
-          //op->update_host_flags = false;
+          op->update_host_flags = false;
         } else if (op->update_host_flags) {
           used_c = false;
         }
@@ -139,7 +139,7 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
           used_c = true;
         }
         break;
-      }
+      }*/
       case IROpcodeClass::AND:
       case IROpcodeClass::BIC:
       case IROpcodeClass::EOR:
