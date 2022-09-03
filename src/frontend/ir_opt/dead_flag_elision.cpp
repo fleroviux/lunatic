@@ -169,7 +169,7 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
         }
         break;
       }
-      case IROpcodeClass::ADC:
+      /*case IROpcodeClass::ADC:
       case IROpcodeClass::SBC:
       case IROpcodeClass::RSC: {
         auto op = (IRAdc*)it->get();
@@ -184,7 +184,7 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
 
         used_c = true;
         break;
-      }
+      }*/
       case IROpcodeClass::MOV:
       case IROpcodeClass::MVN: {
         auto op = (IRMov*)it->get();
