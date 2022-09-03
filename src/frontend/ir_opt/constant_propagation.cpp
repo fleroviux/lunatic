@@ -237,26 +237,6 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
         }
         break;
       }
-      /*case IROpcodeClass::MemoryRead: {
-        const auto ldr = (IRMemoryRead*)op.get();
-
-        auto& address = GetKnownConstant(ldr->address);
-
-        if (address.HasValue()) {
-          fmt::print("constant propagated to LDR address: {:08X}\n", address.Unwrap().value);
-        }
-        break;
-      }
-      case IROpcodeClass::MemoryWrite: {
-        const auto str = (IRMemoryWrite*)op.get();
-
-        auto& address = GetKnownConstant(str->address);
-
-        if (address.HasValue()) {
-          fmt::print("constant propagated to STR address: {:08X}\n", address.Unwrap().value);
-        }
-        break;
-      }*/
     }
   }
 
