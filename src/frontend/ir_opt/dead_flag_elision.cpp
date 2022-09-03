@@ -174,13 +174,13 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
       case IROpcodeClass::RSC: {
         auto op = (IRAdc*)it->get();
 
-        /*if (!used_n && !used_z && !used_v) {
+        if (!used_n && !used_z && !used_c && !used_v) {
           op->update_host_flags = false;
         } else if (op->update_host_flags) {
           used_n = false;
           used_z = false;
           used_v = false;
-        }*/
+        }
 
         used_c = true;
         break;
