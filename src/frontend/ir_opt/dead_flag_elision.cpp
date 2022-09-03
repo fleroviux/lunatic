@@ -129,7 +129,7 @@ void IRDeadFlagElisionPass::DisableRedundantFlagCalculations(IREmitter& emitter)
         auto op = (IRLogicalShiftLeft*)it->get();
 
         if (!used_c) {
-          op->update_host_flags = false;
+          //op->update_host_flags = false;
         } else if (op->update_host_flags) {
           used_c = false;
         }
