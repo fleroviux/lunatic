@@ -5,6 +5,7 @@
 #include <lunatic/cpu.hpp>
 #include <vector>
 
+#include "frontend/ir_opt/constant_propagation.hpp"
 #include "frontend/ir_opt/context_load_store_elision.hpp"
 #include "frontend/ir_opt/dead_code_elision.hpp"
 #include "frontend/ir_opt/dead_flag_elision.hpp"
@@ -24,6 +25,7 @@ struct JIT final : CPU {
       , translator(descriptor)
       , backend(descriptor, state, block_cache, irq_line) {
     passes.push_back(std::make_unique<IRContextLoadStoreElisionPass>());
+    passes.push_back(std::make_unique<IRConstantPropagationPass>());
     passes.push_back(std::make_unique<IRDeadFlagElisionPass>());
     passes.push_back(std::make_unique<IRDeadCodeElisionPass>());
   }

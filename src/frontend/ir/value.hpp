@@ -47,6 +47,7 @@ private:
 
 /// Represents an immediate (constant) value
 struct IRConstant {
+  IRConstant() : data_type(IRDataType::UInt32), value(0) {}
   IRConstant(u32 value) : data_type(IRDataType::UInt32), value(value) {}
 
   /// The underlying data type
@@ -96,6 +97,16 @@ struct IRAnyRef {
   ) {
     if (IsVariable() && (&GetVar() == &var_old)) {
       variable = &var_new;
+    }
+  }
+
+  void PropagateConstant(
+    IRVariable const& var,
+    IRConstant const& constant
+  ) {
+    if (IsVariable() && (&GetVar() == &var)) {
+      type = Type::Constant;
+      this->constant = constant;
     }
   }
 

@@ -41,5 +41,5 @@ struct Optional {
 
 private:
   bool is_null;
-  typename Pointerify<T>::type value;
+  typename Pointerify<T>::type value{};
 };

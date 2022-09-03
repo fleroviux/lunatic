@@ -20,6 +20,7 @@ set(SOURCES
   backend/x86_64/register_allocator.cpp
   common/pool_allocator.cpp
   frontend/ir/emitter.cpp
+  frontend/ir_opt/constant_propagation.cpp
   frontend/ir_opt/context_load_store_elision.cpp
   frontend/ir_opt/dead_code_elision.cpp
   frontend/ir_opt/dead_flag_elision.cpp
@@ -79,6 +80,7 @@ set(HEADERS
   frontend/ir/opcode.hpp
   frontend/ir/register.hpp
   frontend/ir/value.hpp
+  frontend/ir_opt/constant_propagation.hpp
   frontend/ir_opt/context_load_store_elision.hpp
   frontend/ir_opt/dead_code_elision.hpp
   frontend/ir_opt/dead_flag_elision.hpp
