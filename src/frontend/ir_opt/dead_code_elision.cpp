@@ -15,12 +15,52 @@ void IRDeadCodeElisionPass::Run(IREmitter& emitter) {
 	auto it = code.begin();
   auto end = code.end();
 
+  const auto WillVarBeRead = [&](IRVariable const& var) {
+    // TODO: do not entire all opcodes, this is wasteful.
+    for (auto& op : code) {
+      if (op->Reads(var))
+        return true;
+    }
+    return false;
+  };
+
   while (it != end) {
-    switch (it->get()->GetClass()) {
-    	// ADD #0 is a no-operation
+    const auto op_class = it->get()->GetClass();
+
+    // Handle opcodes that become redundant when their result variable is unread
+    switch (op_class) {
+      case IROpcodeClass::MOV: {
+        auto op = lunatic_cast<IRMov>(it->get());
+
+        if (!WillVarBeRead(op->result.Get()) && !op->update_host_flags) {
+          it = code.erase(it);
+          fmt::print("removed: {}\n", op->ToString());
+          continue;
+        }
+        break;
+      }
+      case IROpcodeClass::ADD:
+      case IROpcodeClass::SUB:
+      case IROpcodeClass::AND:
+      case IROpcodeClass::BIC:
+      case IROpcodeClass::EOR:
+      case IROpcodeClass::ORR: {
+        auto op = (IRAdd*)it->get();
+
+        if ((!op->result.HasValue() ||!WillVarBeRead(op->result.Unwrap())) && !op->update_host_flags) {
+          fmt::print("removed: {}\n", op->ToString());
+          it = code.erase(it);
+          continue;
+        }
+        break;
+      }
+    }
+
+    switch (op_class) {
       case IROpcodeClass::ADD: {
         auto op = lunatic_cast<IRAdd>(it->get());
 
+        // ADD #0 is a no-operation
         if (op->result.HasValue() && op->rhs.IsConstant() && op->rhs.GetConst().value == 0 && !op->update_host_flags) {
           if (Repoint(op->result.Unwrap(), op->lhs.Get(), it, end)) {
             it = code.erase(it);
@@ -41,10 +81,10 @@ void IRDeadCodeElisionPass::Run(IREmitter& emitter) {
         }
         break;
       }
-      // MOV var_a, var_b: var_a is a redundant variable.
       case IROpcodeClass::MOV: {
         auto op = lunatic_cast<IRMov>(it->get());
 
+        // MOV var_a, var_b: var_a is a redundant variable.
         if (op->source.IsVariable() && !op->update_host_flags) {
           if (Repoint(op->result.Get(), op->source.GetVar(), it, end)) {
             it = code.erase(it);

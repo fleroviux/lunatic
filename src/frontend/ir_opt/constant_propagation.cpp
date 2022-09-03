@@ -44,6 +44,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
       case IROpcodeClass::MOV: {
         const auto mov = (IRMov*)op.get();
 
+        // TODO: this breaks the MOV test in ARMWrestler somehow; games appear to work fine though.
         if (mov->source.IsConstant()) {
           p(op);
           Propagate(mov->result.Get(), mov->source.GetConst());
