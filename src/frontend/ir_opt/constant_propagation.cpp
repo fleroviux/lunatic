@@ -158,7 +158,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
         break;
       }
       case IROpcodeClass::MUL: {
-        auto mul = (IRMultiply*)op.get();
+        const auto mul = (IRMultiply*)op.get();
 
         auto& lhs = GetKnownConstant(mul->lhs.Get());
         auto& rhs = GetKnownConstant(mul->rhs.Get());
@@ -188,6 +188,26 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
             p(op);
             Propagate(mul->result_lo.Get(), constant);
           }
+        }
+        break;
+      }
+      case IROpcodeClass::MemoryRead: {
+        const auto ldr = (IRMemoryRead*)op.get();
+
+        auto& address = GetKnownConstant(ldr->address);
+
+        if (address.HasValue()) {
+          fmt::print("constant propagated to LDR address: {:08X}\n", address.Unwrap().value);
+        }
+        break;
+      }
+      case IROpcodeClass::MemoryWrite: {
+        const auto str = (IRMemoryWrite*)op.get();
+
+        auto& address = GetKnownConstant(str->address);
+
+        if (address.HasValue()) {
+          fmt::print("constant propagated to STR address: {:08X}\n", address.Unwrap().value);
         }
         break;
       }
