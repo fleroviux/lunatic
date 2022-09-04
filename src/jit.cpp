@@ -153,12 +153,14 @@ private:
 
   void Optimize(BasicBlock* basic_block) {
     for (auto &micro_block : basic_block->micro_blocks) {
+      fmt::print("----------------------------------------------\n");
+      fmt::print("UNOPTIMIZED:\n{}\n", micro_block.emitter.ToString());
+
       for (auto& pass : passes) {
         pass->Run(micro_block.emitter);
       }
 
-      fmt::print("----------------------------------------------\n");
-      fmt::print("{}\n", micro_block.emitter.ToString());
+      fmt::print("OPTIMIZED:\n{}\n", micro_block.emitter.ToString());
     }
   }
 
