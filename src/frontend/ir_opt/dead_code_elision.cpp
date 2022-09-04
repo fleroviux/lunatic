@@ -12,119 +12,115 @@ namespace frontend {
 
 void IRDeadCodeElisionPass::Run(IREmitter& emitter) {
 	auto& code = emitter.Code();
-	auto it = code.begin();
-  auto end = code.end();
-
-  const auto WillVarBeRead = [&](IRVariable const& var) {
-    // TODO: do not entire all opcodes, this is wasteful.
-    for (auto& op : code) {
-      if (op->Reads(var))
-        return true;
-    }
-    return false;
-  };
+  this->emitter = &emitter;
+  it = code.begin();
+  end = code.end();
 
   while (it != end) {
-    const auto op_class = it->get()->GetClass();
+    bool dead = false;
 
-    // Handle opcodes that become redundant when their result variable is unread
-    switch (op_class) {
-      case IROpcodeClass::MOV: {
-        auto op = lunatic_cast<IRMov>(it->get());
-
-        if (!WillVarBeRead(op->result.Get()) && !op->update_host_flags) {
-          it = code.erase(it);
-          fmt::print("removed: {}\n", op->ToString());
-          continue;
-        }
-        break;
-      }
-      case IROpcodeClass::LSL:
-      case IROpcodeClass::LSR:
-      case IROpcodeClass::ASR:
-      case IROpcodeClass::ROR: {
-        auto op = (IRLogicalShiftLeft*)(it->get());
-
-        if (!WillVarBeRead(op->result.Get()) && !op->update_host_flags) {
-          it = code.erase(it);
-          fmt::print("removed: {}\n", op->ToString());
-          continue;
-        }
-        break;
-      }
-      case IROpcodeClass::ADD:
-      case IROpcodeClass::SUB:
-      case IROpcodeClass::AND:
-      case IROpcodeClass::BIC:
-      case IROpcodeClass::EOR:
-      case IROpcodeClass::ORR: {
-        auto op = (IRAdd*)it->get();
-
-        if ((!op->result.HasValue() ||!WillVarBeRead(op->result.Unwrap())) && !op->update_host_flags) {
-          fmt::print("removed: {}\n", op->ToString());
-          it = code.erase(it);
-          continue;
-        }
-        break;
-      }
-      case IROpcodeClass::MUL: {
-        auto op = lunatic_cast<IRMultiply>(it->get());
-
-        if (!WillVarBeRead(op->result_lo.Get()) &&
-           (!op->result_hi.HasValue() || !WillVarBeRead(op->result_hi.Unwrap())) &&
-           !op->update_host_flags) {
-          fmt::print("removed: {}\n", op->ToString());
-          it = code.erase(it);
-          continue;
-        }
-        break;
-      }
+    switch (it->get()->GetClass()) {
+      case IROpcodeClass::MOV: dead = CheckMOV(lunatic_cast<IRMov>(it->get())); break;
+      case IROpcodeClass::LSL: dead = CheckShifterOp(lunatic_cast<IRLogicalShiftLeft>(it->get())); break;
+      case IROpcodeClass::LSR: dead = CheckShifterOp(lunatic_cast<IRLogicalShiftRight>(it->get())); break;
+      case IROpcodeClass::ASR: dead = CheckShifterOp(lunatic_cast<IRArithmeticShiftRight>(it->get())); break;
+      case IROpcodeClass::ROR: dead = CheckShifterOp(lunatic_cast<IRRotateRight>(it->get())); break;
+      case IROpcodeClass::ADD: dead = CheckBinaryOp(lunatic_cast<IRAdd>(it->get())); break;
+      case IROpcodeClass::SUB: dead = CheckBinaryOp(lunatic_cast<IRSub>(it->get())); break;
+      case IROpcodeClass::AND: dead = CheckBinaryOp(lunatic_cast<IRBitwiseAND>(it->get())); break;
+      case IROpcodeClass::BIC: dead = CheckBinaryOp(lunatic_cast<IRBitwiseBIC>(it->get())); break;
+      case IROpcodeClass::EOR: dead = CheckBinaryOp(lunatic_cast<IRBitwiseEOR>(it->get())); break;
+      case IROpcodeClass::ORR: dead = CheckBinaryOp(lunatic_cast<IRBitwiseORR>(it->get())); break;
+      case IROpcodeClass::MUL: dead = CheckMUL(lunatic_cast<IRMultiply>(it->get())); break;
     }
 
-    switch (op_class) {
-      case IROpcodeClass::ADD: {
-        auto op = lunatic_cast<IRAdd>(it->get());
-
-        // ADD #0 is a no-operation
-        if (op->result.HasValue() && op->rhs.IsConstant() && op->rhs.GetConst().value == 0 && !op->update_host_flags) {
-          if (Repoint(op->result.Unwrap(), op->lhs.Get(), it, end)) {
-            it = code.erase(it);
-            continue;
-          }
-        }
-        break;
-      }
-      // LSL(S) #0 is a no-operation
-      case IROpcodeClass::LSL: {
-        auto op = lunatic_cast<IRLogicalShiftLeft>(it->get());
-        
-        if (op->amount.IsConstant() && op->amount.GetConst().value == 0) {
-          if (Repoint(op->result.Get(), op->operand.Get(), it, end)) {
-            it = code.erase(it);
-            continue;
-          }
-        }
-        break;
-      }
-      case IROpcodeClass::MOV: {
-        auto op = lunatic_cast<IRMov>(it->get());
-
-        // MOV var_a, var_b: var_a is a redundant variable.
-        if (op->source.IsVariable() && !op->update_host_flags) {
-          if (Repoint(op->result.Get(), op->source.GetVar(), it, end)) {
-            it = code.erase(it);
-            continue;
-          }
-        }
-        break;
-      }
-      default: {
-      	break;
-      }
+    if (dead) {
+      it = code.erase(it);
+    } else {
+      ++it;
     }
-
-    ++it;
   }
+}
+
+bool IRDeadCodeElisionPass::CheckMOV(IRMov* op) {
+  if (IsValueUnused(op->result.Get()) && !op->update_host_flags) {
+    return true;
+  }
+
+  // MOV var_a, var_b: var_a is a redundant variable.
+  if (op->source.IsVariable() &&
+      !op->update_host_flags &&
+    Repoint(op->result.Get(), op->source.GetVar(), it, end)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+template<class OpcodeType>
+bool IRDeadCodeElisionPass::CheckShifterOp(OpcodeType* op) {
+  if (IsValueUnused(op->result.Get()) && !op->update_host_flags) {
+    return true;
+  }
+
+  // LSL #0 is a no-operation
+  if constexpr(OpcodeType::klass == IROpcodeClass::LSL) {
+    if (op->amount.IsConstant() &&
+        op->amount.GetConst().value == 0 &&
+        Repoint(op->result.Get(), op->operand.Get(), it, end)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+template<class OpcodeType>
+bool IRDeadCodeElisionPass::CheckBinaryOp(OpcodeType* op) {
+  if ((!op->result.HasValue() ||IsValueUnused(op->result.Unwrap())) && !op->update_host_flags) {
+    return true;
+  }
+
+  // ADD #0 is a no-operation
+  if constexpr(OpcodeType::klass == IROpcodeClass::ADD) {
+    if (op->result.HasValue() &&
+        op->rhs.IsConstant() &&
+        op->rhs.GetConst().value == 0 &&
+        !op->update_host_flags &&
+        Repoint(op->result.Unwrap(), op->lhs.Get(), it, end)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool IRDeadCodeElisionPass::CheckMUL(IRMultiply* op) {
+  if (IsValueUnused(op->result_lo.Get()) &&
+      (!op->result_hi.HasValue() || IsValueUnused(op->result_hi.Unwrap())) &&
+      !op->update_host_flags
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+bool IRDeadCodeElisionPass::IsValueUnused(IRVariable const& var) {
+  auto local_it = it;
+
+  ++local_it;
+
+  while (local_it != end) {
+    if (local_it->get()->Reads(var))
+      return false;
+    ++local_it;
+  }
+
+  return true;
 }
 
 } // namespace lunatic::frontend

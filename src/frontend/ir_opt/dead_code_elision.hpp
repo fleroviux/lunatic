@@ -14,6 +14,23 @@ namespace frontend {
 
 struct IRDeadCodeElisionPass final : IRPass {
   void Run(IREmitter& emitter) override;
+
+private:
+  bool CheckMOV(IRMov* op);
+
+  template<class OpcodeType>
+  bool CheckShifterOp(OpcodeType* op);
+
+  template<class OpcodeType>
+  bool CheckBinaryOp(OpcodeType* op);
+
+  bool CheckMUL(IRMultiply* op);
+
+  bool IsValueUnused(IRVariable const& var);
+
+  IREmitter* emitter;
+  IREmitter::InstructionList::iterator it;
+  IREmitter::InstructionList::iterator end;
 };
 
 } // namespace lunatic::frontend

@@ -18,10 +18,7 @@ void IRDeadFlagElisionPass::Run(IREmitter& emitter) {
 
 void IRDeadFlagElisionPass::RemoveRedundantUpdateFlagsOpcodes(IREmitter& emitter) {
   /**
-   * TODO:
-   * a) implement the same logic for the Q-flag (update.q)
-   * b) when we remove an update.nzcv opcode, turn ADDS into ADD (for example).
-   *    - careful: ADC might still want to read the C-flag from that ADDS operation.
+   * TODO: implement the same logic for the Q-flag (update.q)
    */
 
   bool unused_n = false;

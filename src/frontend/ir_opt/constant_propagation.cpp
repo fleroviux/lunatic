@@ -36,7 +36,6 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
       case IROpcodeClass::MUL: DoMUL(op); break;
     }
   }
-
 }
 
 void IRConstantPropagationPass::Propagate(IRVariable const& var, IRConstant const& constant) {
