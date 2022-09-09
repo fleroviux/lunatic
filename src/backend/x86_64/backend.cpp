@@ -136,7 +136,13 @@ void X64Backend::Compile(BasicBlock& basic_block) {
         auto& branch_target = basic_block.branch_target;
 
         if (branch_target.key.value != 0) {
-          auto target_block = block_cache.Get(branch_target.key);
+          BasicBlock* target_block;
+
+          if (branch_target.key == basic_block.key) {
+            target_block = &basic_block;
+          } else {
+            target_block =  block_cache.Get(branch_target.key);
+          }
 
           if (target_block != nullptr) {
             // Return to the dispatcher if we ran out of cycles.

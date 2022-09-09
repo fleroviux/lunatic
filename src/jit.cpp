@@ -140,7 +140,9 @@ private:
 
     if (depth <= 8) {
       auto branch_target_key = basic_block->branch_target.key;
-      if (branch_target_key.value != 0 && !block_cache.Get(branch_target_key)) {
+      if (branch_target_key.value != 0 &&
+          branch_target_key != block_key &&
+         !block_cache.Get(branch_target_key)) {
         Compile(branch_target_key, ++depth);
       }
     }
@@ -153,14 +155,9 @@ private:
 
   void Optimize(BasicBlock* basic_block) {
     for (auto &micro_block : basic_block->micro_blocks) {
-      fmt::print("----------------------------------------------\n");
-      fmt::print("UNOPTIMIZED:\n{}\n", micro_block.emitter.ToString());
-
       for (auto& pass : passes) {
         pass->Run(micro_block.emitter);
       }
-
-      fmt::print("OPTIMIZED:\n{}\n", micro_block.emitter.ToString());
     }
   }
 

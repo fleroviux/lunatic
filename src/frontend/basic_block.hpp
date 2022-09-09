@@ -42,6 +42,14 @@ struct BasicBlock : PoolObject {
     auto Address() -> u32 { return (value & 0x7FFFFFFF) << 1; }
     auto Mode() -> Mode { return static_cast<lunatic::Mode>((value >> 31) & 0x1F); }
     bool Thumb() { return value & (1ULL << 36); }
+
+    bool operator==(Key const& other) const {
+      return value == other.value;
+    }
+
+    bool operator!=(Key const& other) const {
+      return value != other.value;
+    }
     
     // bits  0 - 30: address[31:1]
     // bits 31 - 35: CPU mode
