@@ -56,15 +56,11 @@ struct BasicBlockCache {
 
     auto current_block = std::move(table->data[hash1]);
 
-    if (table->data[hash1]) {
-      fmt::print("THIS SHOULD NEVER HAPPEN!!!\n");
-    }
-
     // Temporary fix: remove any linked blocks from the cache as well.
     if (current_block && current_block.get() != block) {
-      for (auto linked_block : current_block->linked_blocks) {
-        if (linked_block != current_block.get()) {
-          Set(linked_block->key, nullptr);
+      for (auto linking_block : current_block->linking_blocks) {
+        if (linking_block != current_block.get()) {
+          Set(linking_block->key, nullptr);
         }
       }
     }

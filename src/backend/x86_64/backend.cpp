@@ -157,7 +157,7 @@ void X64Backend::Compile(BasicBlock& basic_block) {
             // The branch target is already compiled, emit a relative jump to it now.
             code->jmp((const void*)target_block->function);
 
-            target_block->linked_blocks.push_back(&basic_block);
+            target_block->linking_blocks.push_back(&basic_block);
           } else {
             /* The branch target has not been compiled yet.
              * Create a padding of 5 NOPs and memorize its address, so that a relative jump
@@ -363,7 +363,7 @@ void X64Backend::Link(BasicBlock& basic_block) {
     patch[3] = (u8)(relative_address >> 16);
     patch[4] = (u8)(relative_address >> 24);
 
-    basic_block.linked_blocks.push_back(linking_block);
+    basic_block.linking_blocks.push_back(linking_block);
   }
 
   block_linking_table.erase(iterator);
@@ -374,12 +374,21 @@ void X64Backend::OnBasicBlockToBeDeleted(BasicBlock const& basic_block) {
 
   auto const& branch_target = basic_block.branch_target;
 
-  // Do not leave dangling pointers to the block in the block linking table.
+  // Do not leave a dangling pointer to the block in the block linking table or the target block.
   if (!branch_target.key.IsEmpty()) {
     auto iterator = block_linking_table.find(branch_target.key);
 
     if (iterator != block_linking_table.end()) {
       auto& linking_blocks = iterator->second;
+
+      linking_blocks.erase(std::find(
+        linking_blocks.begin(), linking_blocks.end(), &basic_block));
+    }
+
+    auto target_block = block_cache.Get(branch_target.key);
+
+    if (target_block) {
+      auto& linking_blocks = target_block->linking_blocks;
 
       linking_blocks.erase(std::find(
         linking_blocks.begin(), linking_blocks.end(), &basic_block));
