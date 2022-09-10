@@ -55,6 +55,8 @@ private:
 
   void Link(BasicBlock& basic_block);
 
+  void OnBasicBlockToBeDeleted(BasicBlock const& basic_block);
+
   void CompileIROp(
     CompileContext const& context,
     std::unique_ptr<IROpcode> const& op

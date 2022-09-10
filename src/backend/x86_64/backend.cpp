@@ -213,6 +213,10 @@ void X64Backend::Compile(BasicBlock& basic_block) {
 
     Link(basic_block);
 
+    basic_block.RegisterReleaseCallback([this](BasicBlock const& basic_block) {
+      OnBasicBlockToBeDeleted(basic_block);
+    });
+
 #if LUNATIC_USE_VTUNE
     vtune::ReportBasicBlock(basic_block, code->getCurr());
 #endif
@@ -363,6 +367,24 @@ void X64Backend::Link(BasicBlock& basic_block) {
   }
 
   block_linking_table.erase(iterator);
+}
+
+void X64Backend::OnBasicBlockToBeDeleted(BasicBlock const& basic_block) {
+  // TODO: release the allocated JIT buffer memory.
+
+  auto const& branch_target = basic_block.branch_target;
+
+  // Do not leave dangling pointers to the block in the block linking table.
+  if (!branch_target.key.IsEmpty()) {
+    auto iterator = block_linking_table.find(branch_target.key);
+
+    if (iterator != block_linking_table.end()) {
+      auto& linking_blocks = iterator->second;
+
+      linking_blocks.erase(std::find(
+        linking_blocks.begin(), linking_blocks.end(), &basic_block));
+    }
+  }
 }
 
 void X64Backend::CompileIROp(
