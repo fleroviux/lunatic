@@ -156,6 +156,8 @@ void X64Backend::Compile(BasicBlock& basic_block) {
           if (target_block) {
             // The branch target is already compiled, emit a relative jump to it now.
             code->jmp((const void*)target_block->function);
+
+            target_block->linked_blocks.push_back(&basic_block);
           } else {
             /* The branch target has not been compiled yet.
              * Create a padding of 5 NOPs and memorize its address, so that a relative jump
@@ -356,6 +358,8 @@ void X64Backend::Link(BasicBlock& basic_block) {
     patch[2] = (u8)(relative_address >>  8);
     patch[3] = (u8)(relative_address >> 16);
     patch[4] = (u8)(relative_address >> 24);
+
+    basic_block.linked_blocks.push_back(linking_block);
   }
 
   block_linking_table.erase(iterator);

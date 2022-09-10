@@ -54,7 +54,21 @@ struct BasicBlockCache {
       data[hash0] = std::make_unique<Table>();
     }
 
-    // TODO: pass basic block as std::unique_ptr?
+    auto current_block = std::move(table->data[hash1]);
+
+    if (table->data[hash1]) {
+      fmt::print("THIS SHOULD NEVER HAPPEN!!!\n");
+    }
+
+    // Temporary fix: remove any linked blocks from the cache as well.
+    if (current_block && current_block.get() != block) {
+      for (auto linked_block : current_block->linked_blocks) {
+        if (linked_block != current_block.get()) {
+          Set(linked_block->key, nullptr);
+        }
+      }
+    }
+
     table->data[hash1] = std::unique_ptr<BasicBlock>{block};
   }
 

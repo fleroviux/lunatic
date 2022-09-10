@@ -92,6 +92,8 @@ struct BasicBlock : PoolObject {
     u8* patch_location = nullptr;
   } branch_target;
 
+  std::vector<BasicBlock*> linked_blocks;
+
   u32 hash = 0;
   bool enable_fast_dispatch = true;
 };
