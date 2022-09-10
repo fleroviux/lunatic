@@ -74,7 +74,7 @@ struct JIT final : CPU {
       auto hash = GetBasicBlockHash(block_key);
 
       if (basic_block == nullptr || basic_block->hash != hash) {
-        basic_block = Compile(block_key, 0);
+        basic_block = Compile(block_key);
       }
 
       cycles_to_run = backend.Call(*basic_block, cycles_to_run);
@@ -130,22 +130,13 @@ struct JIT final : CPU {
   }
 
 private:
-  auto Compile(BasicBlock::Key block_key, int depth) -> BasicBlock* {
+  auto Compile(BasicBlock::Key block_key) -> BasicBlock* {
     auto basic_block = new BasicBlock{block_key};
-
-    translator.Translate(*basic_block);
-    Optimize(basic_block);
 
     basic_block->hash = GetBasicBlockHash(block_key);
 
-    if (depth <= 8) {
-      auto branch_target_key = basic_block->branch_target.key;
-      if (branch_target_key.value != 0 &&
-          branch_target_key != block_key &&
-         !block_cache.Get(branch_target_key)) {
-        Compile(branch_target_key, ++depth);
-      }
-    }
+    translator.Translate(*basic_block);
+    Optimize(basic_block);
 
     backend.Compile(*basic_block);
     block_cache.Set(block_key, basic_block);

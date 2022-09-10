@@ -141,20 +141,33 @@ void X64Backend::Compile(BasicBlock& basic_block) {
           if (branch_target.key == basic_block.key) {
             target_block = &basic_block;
           } else {
-            target_block =  block_cache.Get(branch_target.key);
+            target_block = block_cache.Get(branch_target.key);
           }
 
-          if (target_block != nullptr) {
-            // Return to the dispatcher if we ran out of cycles.
-            code->sub(rbx, basic_block.length);
-            code->jle(label_return_to_dispatch, Xbyak::CodeGenerator::T_NEAR);
+          // Return to the dispatcher if we ran out of cycles.
+          code->sub(rbx, basic_block.length);
+          code->jle(label_return_to_dispatch, Xbyak::CodeGenerator::T_NEAR);
 
-            // Return to the dispatcher if there is an IRQ to handle
-            code->mov(rdx, uintptr(&irq_line));
-            code->cmp(byte[rdx], 0);
-            code->jnz(label_return_to_dispatch);
+          // Return to the dispatcher if there is an IRQ to handle
+          code->mov(rdx, uintptr(&irq_line));
+          code->cmp(byte[rdx], 0);
+          code->jnz(label_return_to_dispatch);
 
+          if (target_block) {
+            // The branch target is already compiled, emit a relative jump to it now.
             code->jmp((const void*)target_block->function);
+          } else {
+            /* The branch target has not been compiled yet.
+             * Create a padding of 5 NOPs and memorize its address, so that a relative jump
+             * can be patched in once the branch target has been compiled.
+             */
+            branch_target.patch_location = code->getCurr<u8*>();
+            code->nop(5);
+
+            /* Memorize that this basic block should link to the branch target,
+             * so that we know which blocks to patch once the branch target has been compiled.
+             */
+            block_linking_table[branch_target.key].push_back(&basic_block);
           }
         }
       }
@@ -195,6 +208,8 @@ void X64Backend::Compile(BasicBlock& basic_block) {
       code->sub(rbx, basic_block.length);
       code->ret();
     }
+
+    Link(basic_block);
 
 #if LUNATIC_USE_VTUNE
     vtune::ReportBasicBlock(basic_block, code->getCurr());
@@ -323,6 +338,27 @@ void X64Backend::EmitBasicBlockDispatch(Xbyak::Label& label_cache_miss) {
   code->lahf();
 
   code->jmp(rdi);
+}
+
+void X64Backend::Link(BasicBlock& basic_block) {
+  auto iterator = block_linking_table.find(basic_block.key);
+
+  if (iterator == block_linking_table.end()) {
+    return;
+  }
+
+  for (auto linking_block : iterator->second) {
+    u8* patch = linking_block->branch_target.patch_location;
+    u32 relative_address = (u32)((s64)basic_block.function - (s64)patch - 5LL);
+
+    patch[0] = 0xE9;
+    patch[1] = (u8)(relative_address >>  0);
+    patch[2] = (u8)(relative_address >>  8);
+    patch[3] = (u8)(relative_address >> 16);
+    patch[4] = (u8)(relative_address >> 24);
+  }
+
+  block_linking_table.erase(iterator);
 }
 
 void X64Backend::CompileIROp(

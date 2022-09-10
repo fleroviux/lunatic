@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <functional>
 #include <lunatic/integer.hpp>
 #include <vector>
 
@@ -65,6 +66,14 @@ struct BasicBlock : PoolObject {
     // TODO: release the underlying JIT memory.
   }
 
+  bool operator==(BasicBlock const& other) const {
+    return key == other.key;
+  }
+
+  bool operator!=(BasicBlock const& other) const {
+    return key != other.key;
+  }
+
   int length = 0;
 
   struct MicroBlock {
@@ -78,11 +87,10 @@ struct BasicBlock : PoolObject {
   // Pointer to the compiled code.
   CompiledFn function = (CompiledFn)0;
 
-  // TODO: clean this up
   struct BranchTarget {
     Key key{};
+    u8* patch_location = nullptr;
   } branch_target;
-
 
   u32 hash = 0;
   bool enable_fast_dispatch = true;
@@ -90,3 +98,10 @@ struct BasicBlock : PoolObject {
 
 } // namespace lunatic::frontend
 } // namespace lunatic
+
+template<>
+struct std::hash<lunatic::frontend::BasicBlock::Key> {
+  std::size_t operator()(lunatic::frontend::BasicBlock::Key const& key) const {
+    return std::hash<u64>{}(key.value);
+  }
+};

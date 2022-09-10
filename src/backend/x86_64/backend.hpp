@@ -9,6 +9,7 @@
 
 #include <lunatic/cpu.hpp>
 #include <fmt/format.h>
+#include <unordered_map>
 #include <vector>
 
 #include "backend/backend.hpp"
@@ -51,6 +52,8 @@ private:
 
   void EmitConditionalBranch(Condition condition, Xbyak::Label& label_skip);
   void EmitBasicBlockDispatch(Xbyak::Label& label_cache_miss);
+
+  void Link(BasicBlock& basic_block);
 
   void CompileIROp(
     CompileContext const& context,
@@ -119,6 +122,8 @@ private:
 
   u8* buffer;
   Xbyak::CodeGenerator* code;
+
+  std::unordered_map<BasicBlock::Key, std::vector<BasicBlock*>> block_linking_table;
 };
 
 } // namespace lunatic::backend
