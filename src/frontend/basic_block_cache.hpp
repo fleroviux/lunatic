@@ -13,6 +13,13 @@ namespace lunatic {
 namespace frontend {
 
 struct BasicBlockCache {
+ ~BasicBlockCache() {
+    /* Make sure that the cache does not consist of stale points,
+     * once the basic blocks are deleted and X64Backend::OnBasicBlockToBeDeleted() will be called.
+     */
+    Flush();
+  }
+
   void Flush() {
     for (int i = 0; i < 0x40000; i++) {
       data[i] = {};

@@ -390,8 +390,12 @@ void X64Backend::OnBasicBlockToBeDeleted(BasicBlock const& basic_block) {
     if (target_block) {
       auto& linking_blocks = target_block->linking_blocks;
 
-      linking_blocks.erase(std::find(
-        linking_blocks.begin(), linking_blocks.end(), &basic_block));
+      auto iterator = std::find(
+        linking_blocks.begin(), linking_blocks.end(), &basic_block);
+
+      if (iterator != linking_blocks.end()) {
+        linking_blocks.erase(iterator);
+      }
     }
   }
 }
