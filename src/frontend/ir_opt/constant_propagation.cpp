@@ -11,10 +11,6 @@
 namespace lunatic {
 namespace frontend {
 
-const auto p = [](std::unique_ptr<IROpcode> const& op) {
-  fmt::print("propagate: {}\n", op->ToString());
-};
-
 void IRConstantPropagationPass::Run(IREmitter& emitter) {
   this->emitter = &emitter;
   var_to_const.clear();
@@ -44,7 +40,6 @@ void IRConstantPropagationPass::Propagate(IRVariable const& var, IRConstant cons
   // TODO: start at the opcode where the variable is first written.
   for (auto& op : emitter->Code()) {
     if (op->Reads(var)) {
-      fmt::print("propagated to: {}\n", op->ToString());
       op->PropagateConstant(var, constant);
     }
   }
@@ -58,7 +53,6 @@ void IRConstantPropagationPass::DoMOV(std::unique_ptr<IROpcode>& op) {
   auto mov_op = lunatic_cast<IRMov>(op.get());
 
   if (mov_op->source.IsConstant()) {
-    p(op);
     Propagate(mov_op->result.Get(), mov_op->source.GetConst());
   }
 }
@@ -74,7 +68,6 @@ void IRConstantPropagationPass::DoLSL(std::unique_ptr<IROpcode>& op) {
     int shift_amount = (int)(amount.GetConst().value & 255);
     IRConstant constant = shift_amount >= 32 ? 0 : (operand.Unwrap().value << shift_amount);
 
-    p(op);
     Propagate(result, constant);
 
     if (!lsl_op->update_host_flags) {
@@ -94,7 +87,6 @@ void IRConstantPropagationPass::DoLSR(std::unique_ptr<IROpcode>& op) {
     int shift_amount = (int)(amount.GetConst().value & 255);
     IRConstant constant = (shift_amount == 0 || shift_amount >= 32) ? 0 : (operand.Unwrap().value >> shift_amount);
 
-    p(op);
     Propagate(result, constant);
 
     if (!lsr_op->update_host_flags) {
@@ -120,7 +112,6 @@ void IRConstantPropagationPass::DoASR(std::unique_ptr<IROpcode>& op) {
 
     IRConstant constant = (u32)((s32)operand_value >> shift_amount);
 
-    p(op);
     Propagate(result, constant);
 
     if (!asr_op->update_host_flags) {
@@ -146,7 +137,6 @@ void IRConstantPropagationPass::DoROR(std::unique_ptr<IROpcode>& op) {
 
     IRConstant constant = bit::rotate_right(operand.Unwrap().value, shift_amount & 31);
 
-    p(op);
     Propagate(ror_op->result.Get(), constant);
 
     if (!ror_op->update_host_flags) {
@@ -180,7 +170,6 @@ void IRConstantPropagationPass::DoBinaryOp(std::unique_ptr<IROpcode>& op) {
     }
 
     if (result.HasValue()) {
-      p(op);
       Propagate(result.Unwrap(), constant);
     }
 
@@ -215,7 +204,6 @@ void IRConstantPropagationPass::DoMUL(std::unique_ptr<IROpcode>& op) {
         IRConstant constant_lo = (u32)result;
         IRConstant constant_hi = (u32)(result >> 32);
 
-        p(op);
         Propagate(mul_op->result_lo.Get(), constant_lo);
         Propagate(mul_op->result_hi.Unwrap(), constant_hi);
       } else {
@@ -223,14 +211,12 @@ void IRConstantPropagationPass::DoMUL(std::unique_ptr<IROpcode>& op) {
         IRConstant constant_lo = (u32)result;
         IRConstant constant_hi = (u32)(result >> 32);
 
-        p(op);
         Propagate(mul_op->result_lo.Get(), constant_lo);
         Propagate(mul_op->result_hi.Unwrap(), constant_hi);
       }
     } else {
       IRConstant constant = lhs.Unwrap().value * rhs.Unwrap().value;
 
-      p(op);
       Propagate(mul_op->result_lo.Get(), constant);
       op = MOV(mul_op->result_lo.Get(), constant, mul_op->update_host_flags);
     }
