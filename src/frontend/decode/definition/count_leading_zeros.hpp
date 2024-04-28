@@ -9,14 +9,12 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMCountLeadingZeros {
-  Condition condition;
-  GPR reg_src;
-  GPR reg_dst;
-};
+  struct ARMCountLeadingZeros {
+    Condition condition;
+    GPR reg_src;
+    GPR reg_dst;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

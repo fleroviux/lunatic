@@ -9,15 +9,13 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMBranchRelative {
-  Condition condition;
-  s32 offset;
-  bool link;
-  bool exchange;
-};
+  struct ARMBranchRelative {
+    Condition condition;
+    s32 offset;
+    bool link;
+    bool exchange;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

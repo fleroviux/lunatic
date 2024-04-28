@@ -9,13 +9,11 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ThumbBranchLinkSuffix {
-  u32 offset;
-  bool exchange;
-};
+  struct ThumbBranchLinkSuffix {
+    u32 offset;
+    bool exchange;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

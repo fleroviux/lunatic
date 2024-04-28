@@ -9,14 +9,12 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMException {
-  Condition condition;
-  Exception exception;
-  u32 svc_comment = 0;
-};
+  struct ARMException {
+    Condition condition;
+    Exception exception;
+    u32 svc_comment = 0;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

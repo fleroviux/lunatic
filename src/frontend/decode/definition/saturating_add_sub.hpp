@@ -9,17 +9,15 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMSaturatingAddSub {
-  Condition condition;
-  bool subtract;
-  bool double_rhs;
-  GPR reg_dst;
-  GPR reg_lhs;
-  GPR reg_rhs;
-};
+  struct ARMSaturatingAddSub {
+    Condition condition;
+    bool subtract;
+    bool double_rhs;
+    GPR reg_dst;
+    GPR reg_lhs;
+    GPR reg_rhs;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

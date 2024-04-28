@@ -9,20 +9,18 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMBlockDataTransfer {
-  Condition condition;
+  struct ARMBlockDataTransfer {
+    Condition condition;
 
-  bool pre_increment;
-  bool add;
-  bool user_mode;
-  bool writeback;
-  bool load;
-  GPR  reg_base;
-  u16  reg_list;
-};
+    bool pre_increment;
+    bool add;
+    bool user_mode;
+    bool writeback;
+    bool load;
+    GPR  reg_base;
+    u16  reg_list;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

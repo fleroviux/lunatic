@@ -322,7 +322,7 @@ void X64Backend::EmitBasicBlockDispatch(Xbyak::Label& label_cache_miss) {
   // Hash0 lookup (first level)
   code->mov(rsi, rdx);
   code->shr(rsi, 19);
-  code->mov(rdi, uintptr(block_cache.data));
+  code->mov(rdi, uintptr(block_cache.m_data));
   code->mov(rdi, qword[rdi + rsi * sizeof(uintptr)]);
   code->test(rdi, rdi);
   code->jz(label_cache_miss);

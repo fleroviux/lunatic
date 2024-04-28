@@ -9,20 +9,18 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMCoprocessorRegisterTransfer {
-  Condition condition;
+  struct ARMCoprocessorRegisterTransfer {
+    Condition condition;
 
-  bool load;
-  GPR reg_dst;
-  uint coprocessor_id;
-  uint opcode1;
-  uint cn;
-  uint cm;
-  uint opcode2;
-};
+    bool load;
+    GPR reg_dst;
+    uint coprocessor_id;
+    uint opcode1;
+    uint cn;
+    uint cm;
+    uint opcode2;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

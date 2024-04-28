@@ -9,30 +9,28 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMSingleDataTransfer {
-  Condition condition;
+  struct ARMSingleDataTransfer {
+    Condition condition;
 
-  bool immediate;
-  bool pre_increment;
-  bool add;
-  bool byte;
-  bool writeback;
-  bool load;
+    bool immediate;
+    bool pre_increment;
+    bool add;
+    bool byte;
+    bool writeback;
+    bool load;
 
-  GPR reg_dst;
-  GPR reg_base;
+    GPR reg_dst;
+    GPR reg_base;
 
-  u32 offset_imm;
+    u32 offset_imm;
 
-  struct {
-    GPR reg;
-    Shift shift;
-    u32 amount;
-  } offset_reg;
-};
+    struct {
+      GPR reg;
+      Shift shift;
+      u32 amount;
+    } offset_reg;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

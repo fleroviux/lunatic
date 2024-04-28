@@ -9,16 +9,14 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMSingleDataSwap {
-  Condition condition;
-  bool byte;
-  GPR reg_src;
-  GPR reg_dst;
-  GPR reg_base;
-};
+  struct ARMSingleDataSwap {
+    Condition condition;
+    bool byte;
+    GPR reg_src;
+    GPR reg_dst;
+    GPR reg_base;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

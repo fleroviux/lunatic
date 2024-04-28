@@ -9,24 +9,21 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMMoveStatusRegister {
-  Condition condition;
-  bool immediate;
-  bool spsr;
-  int fsxc;
-  GPR reg; // if immediate == false
-  u32 imm; // if immediate == true
-};
+  struct ARMMoveStatusRegister {
+    Condition condition;
+    bool immediate;
+    bool spsr;
+    int fsxc;
+    GPR reg; // if immediate == false
+    u32 imm; // if immediate == true
+  };
 
-struct ARMMoveRegisterStatus {
-  Condition condition;
-  bool spsr;
-  GPR reg;
-};
+  struct ARMMoveRegisterStatus {
+    Condition condition;
+    bool spsr;
+    GPR reg;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic
-

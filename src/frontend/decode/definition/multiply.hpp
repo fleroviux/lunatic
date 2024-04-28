@@ -9,18 +9,16 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMMultiply {
-  Condition condition;
-  bool accumulate;
-  bool set_flags;
-  GPR reg_op1;
-  GPR reg_op2;
-  GPR reg_op3;
-  GPR reg_dst;
-};
+  struct ARMMultiply {
+    Condition condition;
+    bool accumulate;
+    bool set_flags;
+    GPR reg_op1;
+    GPR reg_op2;
+    GPR reg_op3;
+    GPR reg_dst;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic

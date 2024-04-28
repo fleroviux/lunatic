@@ -9,15 +9,13 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMBranchExchange {
-  Condition condition;
-  GPR reg;
-  bool link;
-};
+  struct ARMBranchExchange {
+    Condition condition;
+    GPR reg;
+    bool link;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic
 

@@ -9,26 +9,24 @@
 
 #include "common.hpp"
 
-namespace lunatic {
-namespace frontend {
+namespace lunatic::frontend {
 
-struct ARMHalfwordSignedTransfer {
-  Condition condition;
+  struct ARMHalfwordSignedTransfer {
+    Condition condition;
 
-  bool pre_increment;
-  bool add;
-  bool immediate;
-  bool writeback;
-  // TODO: clean this up... there must be a nice way...
-  bool load;
-  int  opcode;
+    bool pre_increment;
+    bool add;
+    bool immediate;
+    bool writeback;
+    // TODO: clean this up... there must be a nice way...
+    bool load;
+    int  opcode;
 
-  GPR reg_dst;
-  GPR reg_base;
+    GPR reg_dst;
+    GPR reg_base;
 
-  u32 offset_imm;
-  GPR offset_reg;
-};
+    u32 offset_imm;
+    GPR offset_reg;
+  };
 
 } // namespace lunatic::frontend
-} // namespace lunatic
