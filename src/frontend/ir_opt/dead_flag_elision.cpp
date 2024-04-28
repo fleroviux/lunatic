@@ -30,7 +30,7 @@ void IRDeadFlagElisionPass::RemoveRedundantUpdateFlagsOpcodes(IREmitter& emitter
   auto it = code.rbegin();
   auto end = code.rend();
 
-  Optional<IRVariable const&> current_cpsr_in{};
+  Optional<const IRVariable&> current_cpsr_in{};
 
   while (it != end) {
     switch (it->get()->GetClass()) {

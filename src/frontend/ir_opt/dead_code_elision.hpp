@@ -26,7 +26,7 @@ private:
 
   bool CheckMUL(IRMultiply* op);
 
-  bool IsValueUnused(IRVariable const& var);
+  bool IsValueUnused(const IRVariable& var);
 
   IREmitter* emitter;
   IREmitter::InstructionList::iterator it;

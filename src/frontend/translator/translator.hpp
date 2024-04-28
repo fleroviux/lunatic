@@ -64,7 +64,7 @@ private:
   void EmitUpdateQ();
   void EmitAdvancePC();
   void EmitFlush();
-  void EmitFlushExchange(IRVariable const& address);
+  void EmitFlushExchange(const IRVariable& address);
   void EmitFlushNoSwitch();
   void EmitLoadSPSRToCPSR();
 

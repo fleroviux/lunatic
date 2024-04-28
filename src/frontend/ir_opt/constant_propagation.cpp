@@ -34,7 +34,7 @@ void IRConstantPropagationPass::Run(IREmitter& emitter) {
   }
 }
 
-void IRConstantPropagationPass::Propagate(IRVariable const& var, IRConstant const& constant) {
+void IRConstantPropagationPass::Propagate(const IRVariable& var, const IRConstant& constant) {
   var_to_const[var.id] = constant;
 
   // TODO: start at the opcode where the variable is first written.

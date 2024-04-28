@@ -18,7 +18,7 @@ struct IRConstantPropagationPass final : IRPass {
   void Run(IREmitter& emitter) override;
 
 private:
-  void Propagate(IRVariable const& var, IRConstant const& constant);
+  void Propagate(const IRVariable& var, const IRConstant& constant);
   auto GetKnownConstant(IRVarRef const& var) -> Optional<IRConstant>&;
 
   void DoMOV(std::unique_ptr<IROpcode>& op);
@@ -31,7 +31,7 @@ private:
   template<typename OpcodeType>
   void DoBinaryOp(std::unique_ptr<IROpcode>& op);
 
-  static auto MOV(IRVariable const& result, IRConstant const& constant, bool update_host_flags = false) {
+  static auto MOV(const IRVariable& result, const IRConstant& constant, bool update_host_flags = false) {
     return std::make_unique<IRMov>(result, constant, update_host_flags);
   };
 

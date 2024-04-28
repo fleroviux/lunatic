@@ -59,7 +59,7 @@ void X64RegisterAllocator::AdvanceLocation() {
   ReleaseTemporaryHostRegs();
 }
 
-auto X64RegisterAllocator::GetVariableHostReg(IRVariable const& var) -> Xbyak::Reg32 {
+auto X64RegisterAllocator::GetVariableHostReg(const IRVariable& var) -> Xbyak::Reg32 {
   // Check if the variable is already allocated to a register at the moment.
   auto maybe_reg = var_id_to_host_reg[var.id];
   if (maybe_reg.HasValue()) {
@@ -88,8 +88,8 @@ auto X64RegisterAllocator::GetTemporaryHostReg() -> Xbyak::Reg32 {
 }
 
 void X64RegisterAllocator::ReleaseVarAndReuseHostReg(
-  IRVariable const& var_old,
-  IRVariable const& var_new
+  const IRVariable& var_old,
+  const IRVariable& var_new
 ) {
   if (var_id_to_host_reg[var_new.id].HasValue()) {
     return;

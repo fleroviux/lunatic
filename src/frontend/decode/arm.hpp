@@ -31,31 +31,32 @@ namespace lunatic::frontend {
 
   /// Receives decoded opcode data
   template<typename T>
-  struct ARMDecodeClient {
-    /// Return type for Handle() methods.
-    /// Utilized by decode_arm to inter its return type.
-    using return_type = T;
+  class ARMDecodeClient {
+    public:
+      /// Return type for Handle() methods.
+      /// Utilized by decode_arm to inter its return type.
+      using return_type = T;
 
-    virtual T Handle(ARMDataProcessing const& opcode) = 0;
-    virtual T Handle(ARMMoveStatusRegister const& opcode) = 0;
-    virtual T Handle(ARMMoveRegisterStatus const& opcode) = 0;
-    virtual T Handle(ARMMultiply const& opcode) = 0;
-    virtual T Handle(ARMMultiplyLong const& opcode) = 0;
-    virtual T Handle(ARMSingleDataSwap const& opcode) = 0;
-    virtual T Handle(ARMBranchExchange const& opcode) = 0;
-    virtual T Handle(ARMHalfwordSignedTransfer const& opcode) = 0;
-    virtual T Handle(ARMSingleDataTransfer const& opcode) = 0;
-    virtual T Handle(ARMBlockDataTransfer const& opcode) = 0;
-    virtual T Handle(ARMBranchRelative const& opcode) = 0;
-    virtual T Handle(ARMCoprocessorRegisterTransfer const& opcode) = 0;
-    virtual T Handle(ARMException const& opcode) = 0;
-    virtual T Handle(ARMCountLeadingZeros const& opcode) = 0;
-    virtual T Handle(ARMSaturatingAddSub const& opcode) = 0;
-    virtual T Handle(ARMSignedHalfwordMultiply const& opcode) = 0;
-    virtual T Handle(ARMSignedWordHalfwordMultiply const& opcode) = 0;
-    virtual T Handle(ARMSignedHalfwordMultiplyAccumulateLong const& opcode) = 0;
-    virtual T Handle(ThumbBranchLinkSuffix const& opcode) = 0;
-    virtual T Undefined(u32 opcode) = 0;
+      virtual T Handle(ARMDataProcessing const& opcode) = 0;
+      virtual T Handle(ARMMoveStatusRegister const& opcode) = 0;
+      virtual T Handle(ARMMoveRegisterStatus const& opcode) = 0;
+      virtual T Handle(ARMMultiply const& opcode) = 0;
+      virtual T Handle(ARMMultiplyLong const& opcode) = 0;
+      virtual T Handle(ARMSingleDataSwap const& opcode) = 0;
+      virtual T Handle(ARMBranchExchange const& opcode) = 0;
+      virtual T Handle(ARMHalfwordSignedTransfer const& opcode) = 0;
+      virtual T Handle(ARMSingleDataTransfer const& opcode) = 0;
+      virtual T Handle(ARMBlockDataTransfer const& opcode) = 0;
+      virtual T Handle(ARMBranchRelative const& opcode) = 0;
+      virtual T Handle(ARMCoprocessorRegisterTransfer const& opcode) = 0;
+      virtual T Handle(ARMException const& opcode) = 0;
+      virtual T Handle(ARMCountLeadingZeros const& opcode) = 0;
+      virtual T Handle(ARMSaturatingAddSub const& opcode) = 0;
+      virtual T Handle(ARMSignedHalfwordMultiply const& opcode) = 0;
+      virtual T Handle(ARMSignedWordHalfwordMultiply const& opcode) = 0;
+      virtual T Handle(ARMSignedHalfwordMultiplyAccumulateLong const& opcode) = 0;
+      virtual T Handle(ThumbBranchLinkSuffix const& opcode) = 0;
+      virtual T Undefined(u32 opcode) = 0;
   };
 
   namespace detail {

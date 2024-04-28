@@ -25,7 +25,7 @@ void IRContextLoadStoreElisionPass::RemoveLoads(IREmitter& emitter) {
   IRAnyRef current_gpr_value[512] {};
   IRAnyRef current_cpsr_value;
 
-  auto Move = [&](IRVariable const& dst, IRAnyRef src) {
+  auto Move = [&](const IRVariable& dst, IRAnyRef src) {
     code.insert(it, std::make_unique<IRMov>(dst, src, false));
   };
 

@@ -44,7 +44,7 @@ struct X64RegisterAllocator {
    * @returns the host register
    */
   auto GetVariableHostReg(
-    lunatic::frontend::IRVariable const& var
+    const lunatic::frontend::IRVariable& var
   ) -> Xbyak::Reg32;
 
   /**
@@ -64,8 +64,8 @@ struct X64RegisterAllocator {
    * @param  var_new  the variable to receive the released host register
    */
   void ReleaseVarAndReuseHostReg(
-    lunatic::frontend::IRVariable const& var_old,
-    lunatic::frontend::IRVariable const& var_new
+    const lunatic::frontend::IRVariable& var_old,
+    const lunatic::frontend::IRVariable& var_new
   );
 
   bool IsHostRegFree(Xbyak::Reg64 reg) const;

@@ -109,7 +109,7 @@ bool IRDeadCodeElisionPass::CheckMUL(IRMultiply* op) {
   return false;
 }
 
-bool IRDeadCodeElisionPass::IsValueUnused(IRVariable const& var) {
+bool IRDeadCodeElisionPass::IsValueUnused(const IRVariable& var) {
   auto local_it = it;
 
   ++local_it;

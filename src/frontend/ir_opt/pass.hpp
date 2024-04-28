@@ -21,8 +21,8 @@ protected:
   using InstructionList = IREmitter::InstructionList;
 
   bool Repoint(
-    IRVariable const& var_old,
-    IRVariable const& var_new,
+    const IRVariable& var_old,
+    const IRVariable& var_new,
     InstructionList::const_iterator begin,
     InstructionList::const_iterator end
   ) {
