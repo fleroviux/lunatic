@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.3)
 
 project(lunatic CXX)
 
@@ -7,7 +7,13 @@ include(../CMakeModules/FindVTune.cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64|AMD64")
+# Arch detection
+include(../CMakeModules/DetectArchitecture.cmake)
+if (NOT DEFINED ARCHITECTURE)
+  message(FATAL_ERROR "Unsupported architecture")
+endif()
+
+if ("x86_64" IN_LIST ARCHITECTURE)
   set(ARCH_SPECIFIC_SOURCES
     backend/x86_64/backend.cpp
     backend/x86_64/compile_alu.cpp
@@ -28,7 +34,7 @@ if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64|AMD64")
     backend/x86_64/vtune.hpp
   )
 else()
-  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+  message(FATAL_ERROR "Unsupported architecture(s): ${ARCHITECTURE}")
 endif()
 
 set(SOURCES
@@ -118,7 +124,7 @@ target_include_directories(lunatic PUBLIC
     $<INSTALL_INTERFACE:include>)
 target_link_libraries(lunatic PRIVATE fmt)
 
-if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64|AMD64")
+if ("x86_64" IN_LIST ARCHITECTURE)
   target_link_libraries(lunatic PRIVATE xbyak dynarmic)
 
   if (LUNATIC_INCLUDE_XBYAK_FROM_DIRECTORY)
