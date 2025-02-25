@@ -59,8 +59,8 @@ TEST_CASE("AND", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -85,8 +85,8 @@ TEST_CASE("BIC", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -111,8 +111,8 @@ TEST_CASE("EOR", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -137,8 +137,8 @@ TEST_CASE("SUB", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -163,8 +163,8 @@ TEST_CASE("RSB", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -189,8 +189,8 @@ TEST_CASE("ADD", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -215,8 +215,8 @@ TEST_CASE("ADC", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
@@ -247,8 +247,8 @@ TEST_CASE("SBC", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
@@ -280,8 +280,8 @@ TEST_CASE("RSC", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
@@ -313,8 +313,8 @@ TEST_CASE("ORR", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -339,7 +339,7 @@ TEST_CASE("MOV", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -361,7 +361,7 @@ TEST_CASE("MVN", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -383,7 +383,7 @@ u32 clz(u32 x) {
   u32 count = 0;
   u32 bits = 32;
   for (u32 i = bits / 2; i > 0; i /= 2) {
-    u32 mask = 0xFFFFFFFF << (bits - i);
+    u32 mask = UINT32_MAX << (bits - i);
     if ((x & mask) == 0) {
       count += i;
       x <<= i;
@@ -399,7 +399,7 @@ TEST_CASE("CLZ", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -490,8 +490,8 @@ TEST_CASE("MUL", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -516,9 +516,9 @@ TEST_CASE("MLA", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomC = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomC = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -546,8 +546,8 @@ TEST_CASE("UMULL", "[ALU]") {
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
-  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
-  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
 
@@ -563,6 +563,38 @@ TEST_CASE("UMULL", "[ALU]") {
 
     REQUIRE((jit->GetGPR(GPR::R0) | u64(jit->GetGPR(GPR::R1)) << 32) ==
             (u64(OperandA) * OperandB));
+  }
+}
+
+TEST_CASE("UMLAL", "[ALU]") {
+  TestCodeMemory test_code;
+  test_code.WriteWord(0, 0xE0'A1'03'92); // umlal r0, r1, r2, r3
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
+
+  auto jit = CreateCPU(CPU::Descriptor{test_code});
+
+  auto RandomA = Catch::Generators::random<u64>(0, UINT64_MAX);
+  auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
+  auto RandomC = Catch::Generators::random<u32>(0, UINT32_MAX);
+
+  for (u32 i = 0; i < sample_count; ++i) {
+
+    const u64 OperandA = RandomA.get();
+    RandomA.next();
+    const u32 OperandB = RandomB.get();
+    RandomB.next();
+    const u32 OperandC = RandomC.get();
+    RandomC.next();
+
+    jit->SetGPR(GPR::PC, 0);
+    jit->SetGPR(GPR::R0, u32(OperandA));
+    jit->SetGPR(GPR::R1, u32(OperandA >> 32));
+    jit->SetGPR(GPR::R2, OperandB);
+    jit->SetGPR(GPR::R3, OperandC);
+    jit->Run(test_code.b32.size());
+
+    REQUIRE((jit->GetGPR(GPR::R0) | u64(jit->GetGPR(GPR::R1)) << 32) ==
+            (OperandA + u64(OperandB) * OperandC));
   }
 }
 
@@ -590,5 +622,37 @@ TEST_CASE("SMULL", "[ALU]") {
 
     REQUIRE((jit->GetGPR(GPR::R0) | s64(jit->GetGPR(GPR::R1)) << 32) ==
             (s64(OperandA) * OperandB));
+  }
+}
+
+TEST_CASE("SMLAL", "[ALU]") {
+  TestCodeMemory test_code;
+  test_code.WriteWord(0, 0xE0'E1'03'92); // smlal r0, r1, r2, r3
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
+
+  auto jit = CreateCPU(CPU::Descriptor{test_code});
+
+  auto RandomA = Catch::Generators::random<s64>(INT64_MIN, INT64_MAX);
+  auto RandomB = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
+  auto RandomC = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
+
+  for (u32 i = 0; i < sample_count; ++i) {
+
+    const s64 OperandA = RandomA.get();
+    RandomA.next();
+    const s32 OperandB = RandomB.get();
+    RandomB.next();
+    const s32 OperandC = RandomC.get();
+    RandomC.next();
+
+    jit->SetGPR(GPR::PC, 0);
+    jit->SetGPR(GPR::R0, u32(OperandA));
+    jit->SetGPR(GPR::R1, u32(OperandA >> 32));
+    jit->SetGPR(GPR::R2, OperandB);
+    jit->SetGPR(GPR::R3, OperandC);
+    jit->Run(test_code.b32.size());
+
+    REQUIRE((jit->GetGPR(GPR::R0) | s64(jit->GetGPR(GPR::R1)) << 32) ==
+            (OperandA + s64(OperandB) * OperandC));
   }
 }
