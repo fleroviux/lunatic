@@ -63,7 +63,6 @@ TEST_CASE("AND", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -89,7 +88,6 @@ TEST_CASE("BIC", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -115,7 +113,6 @@ TEST_CASE("EOR", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -141,7 +138,6 @@ TEST_CASE("SUB", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -167,7 +163,6 @@ TEST_CASE("RSB", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -193,7 +188,6 @@ TEST_CASE("ADD", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -220,7 +214,6 @@ TEST_CASE("ADC", "[ALU]") {
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -252,7 +245,6 @@ TEST_CASE("SBC", "[ALU]") {
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -285,7 +277,6 @@ TEST_CASE("RSC", "[ALU]") {
   auto RandomC = Catch::Generators::random<u32>(0, 1);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -317,7 +308,6 @@ TEST_CASE("ORR", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -342,7 +332,6 @@ TEST_CASE("MOV", "[ALU]") {
   auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
 
@@ -364,7 +353,6 @@ TEST_CASE("MVN", "[ALU]") {
   auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
 
@@ -402,7 +390,6 @@ TEST_CASE("CLZ", "[ALU]") {
   auto RandomA = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
 
@@ -432,7 +419,6 @@ TEST_CASE("QADD", "[ALU]") {
   auto RandomB = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const s32 OperandA = RandomA.get();
     RandomA.next();
     const s32 OperandB = RandomB.get();
@@ -468,7 +454,6 @@ TEST_CASE("QSUB", "[ALU]") {
   auto RandomB = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const s32 OperandA = RandomA.get();
     RandomA.next();
     const s32 OperandB = RandomB.get();
@@ -494,7 +479,6 @@ TEST_CASE("MUL", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -521,7 +505,6 @@ TEST_CASE("MLA", "[ALU]") {
   auto RandomC = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -550,7 +533,6 @@ TEST_CASE("UMULL", "[ALU]") {
   auto RandomB = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u32 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -578,7 +560,6 @@ TEST_CASE("UMLAL", "[ALU]") {
   auto RandomC = Catch::Generators::random<u32>(0, UINT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const u64 OperandA = RandomA.get();
     RandomA.next();
     const u32 OperandB = RandomB.get();
@@ -609,7 +590,6 @@ TEST_CASE("SMULL", "[ALU]") {
   auto RandomB = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const s32 OperandA = RandomA.get();
     RandomA.next();
     const s32 OperandB = RandomB.get();
@@ -637,7 +617,6 @@ TEST_CASE("SMLAL", "[ALU]") {
   auto RandomC = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
 
   for (u32 i = 0; i < sample_count; ++i) {
-
     const s64 OperandA = RandomA.get();
     RandomA.next();
     const s32 OperandB = RandomB.get();
