@@ -506,3 +506,34 @@ TEST_CASE("MUL", "[ALU]") {
     REQUIRE(jit->GetGPR(GPR::R0) == u32(OperandA * OperandB));
   }
 }
+
+TEST_CASE("MLA", "[ALU]") {
+  TestCodeMemory test_code;
+  test_code.WriteWord(0, 0xE0'20'21'90,
+                      Memory::Bus::Code); // mla r0, r0, r1, r2
+  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+
+  auto jit = CreateCPU(CPU::Descriptor{test_code});
+
+  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomC = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+
+  for (u32 i = 0; i < sample_count; ++i) {
+
+    const u32 OperandA = RandomA.get();
+    RandomA.next();
+    const u32 OperandB = RandomB.get();
+    RandomB.next();
+    const u32 OperandC = RandomC.get();
+    RandomC.next();
+
+    jit->SetGPR(GPR::PC, 0);
+    jit->SetGPR(GPR::R0, OperandA);
+    jit->SetGPR(GPR::R1, OperandB);
+    jit->SetGPR(GPR::R2, OperandC);
+    jit->Run(test_code.b32.size());
+
+    REQUIRE(jit->GetGPR(GPR::R0) == u32(OperandA * OperandB + OperandC));
+  }
+}
