@@ -537,3 +537,59 @@ TEST_CASE("MLA", "[ALU]") {
     REQUIRE(jit->GetGPR(GPR::R0) == u32(OperandA * OperandB + OperandC));
   }
 }
+
+TEST_CASE("UMULL", "[ALU]") {
+  TestCodeMemory test_code;
+  test_code.WriteWord(0, 0xE0'81'01'90,
+                      Memory::Bus::Code); // umull r0, r1, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+
+  auto jit = CreateCPU(CPU::Descriptor{test_code});
+
+  auto RandomA = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+  auto RandomB = Catch::Generators::random<u32>(0, 0xFFFFFFFF);
+
+  for (u32 i = 0; i < sample_count; ++i) {
+
+    const u32 OperandA = RandomA.get();
+    RandomA.next();
+    const u32 OperandB = RandomB.get();
+    RandomB.next();
+
+    jit->SetGPR(GPR::PC, 0);
+    jit->SetGPR(GPR::R0, OperandA);
+    jit->SetGPR(GPR::R1, OperandB);
+    jit->Run(test_code.b32.size());
+
+    REQUIRE((jit->GetGPR(GPR::R0) | u64(jit->GetGPR(GPR::R1)) << 32) ==
+            (u64(OperandA) * OperandB));
+  }
+}
+
+TEST_CASE("SMULL", "[ALU]") {
+  TestCodeMemory test_code;
+  test_code.WriteWord(0, 0xE0'C1'01'90,
+                      Memory::Bus::Code); // smull r0, r1, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+
+  auto jit = CreateCPU(CPU::Descriptor{test_code});
+
+  auto RandomA = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
+  auto RandomB = Catch::Generators::random<s32>(INT32_MIN, INT32_MAX);
+
+  for (u32 i = 0; i < sample_count; ++i) {
+
+    const s32 OperandA = RandomA.get();
+    RandomA.next();
+    const s32 OperandB = RandomB.get();
+    RandomB.next();
+
+    jit->SetGPR(GPR::PC, 0);
+    jit->SetGPR(GPR::R0, OperandA);
+    jit->SetGPR(GPR::R1, OperandB);
+    jit->Run(test_code.b32.size());
+
+    REQUIRE((jit->GetGPR(GPR::R0) | s64(jit->GetGPR(GPR::R1)) << 32) ==
+            (s64(OperandA) * OperandB));
+  }
+}
