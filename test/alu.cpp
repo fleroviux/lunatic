@@ -21,24 +21,26 @@ struct TestCodeMemory final : public lunatic::Memory {
     b32.fill(0xE3'20'F0'00); // nop
   }
 
-  auto ReadByte(u32 address, Bus bus) -> u8 override { return b8[address]; }
-  auto ReadHalf(u32 address, Bus bus) -> u16 override {
+  auto ReadByte(u32 address, Bus bus = Bus::Code) -> u8 override {
+    return b8[address];
+  }
+  auto ReadHalf(u32 address, Bus bus = Bus::Code) -> u16 override {
     assert(address % 2 == 0);
     return b16.at(address / 2);
   }
-  auto ReadWord(u32 address, Bus bus) -> u32 override {
+  auto ReadWord(u32 address, Bus bus = Bus::Code) -> u32 override {
     assert(address % 4 == 0);
     return b32.at(address / 4);
   }
 
-  void WriteByte(u32 address, u8 value, Bus bus) override {
+  void WriteByte(u32 address, u8 value, Bus bus = Bus::Code) override {
     b8.at(address) = value;
   }
-  void WriteHalf(u32 address, u16 value, Bus bus) override {
+  void WriteHalf(u32 address, u16 value, Bus bus = Bus::Code) override {
     assert(address % 2 == 0);
     b16.at(address / 2) = value;
   }
-  void WriteWord(u32 address, u32 value, Bus bus) override {
+  void WriteWord(u32 address, u32 value, Bus bus = Bus::Code) override {
     assert(address % 4 == 0);
     b32.at(address / 4) = value;
   }
@@ -52,8 +54,8 @@ struct TestCodeMemory final : public lunatic::Memory {
 
 TEST_CASE("AND", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'00'00'01, Memory::Bus::Code); // and r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'00'00'01); // and r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -78,8 +80,8 @@ TEST_CASE("AND", "[ALU]") {
 
 TEST_CASE("BIC", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'C0'00'01, Memory::Bus::Code); // bic r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'C0'00'01); // bic r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -104,8 +106,8 @@ TEST_CASE("BIC", "[ALU]") {
 
 TEST_CASE("EOR", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'20'00'01, Memory::Bus::Code); // eor r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'20'00'01); // eor r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -130,8 +132,8 @@ TEST_CASE("EOR", "[ALU]") {
 
 TEST_CASE("SUB", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'40'00'01, Memory::Bus::Code); // sub r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'40'00'01); // sub r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -156,8 +158,8 @@ TEST_CASE("SUB", "[ALU]") {
 
 TEST_CASE("RSB", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'60'00'01, Memory::Bus::Code); // rsb r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'60'00'01); // rsb r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -182,8 +184,8 @@ TEST_CASE("RSB", "[ALU]") {
 
 TEST_CASE("ADD", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'80'00'01, Memory::Bus::Code); // add r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'80'00'01); // add r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -208,8 +210,8 @@ TEST_CASE("ADD", "[ALU]") {
 
 TEST_CASE("ADC", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'A0'00'01, Memory::Bus::Code); // adc r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'A0'00'01); // adc r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -240,8 +242,8 @@ TEST_CASE("ADC", "[ALU]") {
 
 TEST_CASE("SBC", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'C0'00'01, Memory::Bus::Code); // sbc r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'C0'00'01); // sbc r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -273,8 +275,8 @@ TEST_CASE("SBC", "[ALU]") {
 
 TEST_CASE("RSC", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'E0'00'01, Memory::Bus::Code); // sbc r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'E0'00'01); // sbc r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -306,8 +308,8 @@ TEST_CASE("RSC", "[ALU]") {
 
 TEST_CASE("ORR", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'80'00'01, Memory::Bus::Code); // orr r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'80'00'01); // orr r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -332,8 +334,8 @@ TEST_CASE("ORR", "[ALU]") {
 
 TEST_CASE("MOV", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'A0'00'01, Memory::Bus::Code); // mov r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'A0'00'01); // mov r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -354,8 +356,8 @@ TEST_CASE("MOV", "[ALU]") {
 
 TEST_CASE("MVN", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'E0'00'01, Memory::Bus::Code); // mov r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'E0'00'01); // mov r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -392,8 +394,8 @@ u32 clz(u32 x) {
 
 TEST_CASE("CLZ", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'6F'0F'11, Memory::Bus::Code); // clz r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'6F'0F'11); // clz r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -421,8 +423,8 @@ s32 saturated_add(s32 a, s32 b) {
 
 TEST_CASE("QADD", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'01'00'50, Memory::Bus::Code); // qadd r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'01'00'50); // qadd r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -457,8 +459,8 @@ s32 saturated_sub(s32 a, s32 b) {
 
 TEST_CASE("QSUB", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE1'21'00'50, Memory::Bus::Code); // qsub r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE1'21'00'50); // qsub r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -483,8 +485,8 @@ TEST_CASE("QSUB", "[ALU]") {
 
 TEST_CASE("MUL", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'00'01'90, Memory::Bus::Code); // mul r0, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'00'01'90); // mul r0, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -509,9 +511,8 @@ TEST_CASE("MUL", "[ALU]") {
 
 TEST_CASE("MLA", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'20'21'90,
-                      Memory::Bus::Code); // mla r0, r0, r1, r2
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'20'21'90); // mla r0, r0, r1, r2
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -540,9 +541,8 @@ TEST_CASE("MLA", "[ALU]") {
 
 TEST_CASE("UMULL", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'81'01'90,
-                      Memory::Bus::Code); // umull r0, r1, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'81'01'90); // umull r0, r1, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
@@ -568,9 +568,8 @@ TEST_CASE("UMULL", "[ALU]") {
 
 TEST_CASE("SMULL", "[ALU]") {
   TestCodeMemory test_code;
-  test_code.WriteWord(0, 0xE0'C1'01'90,
-                      Memory::Bus::Code); // smull r0, r1, r0, r1
-  test_code.WriteWord(4, 0xEA'FF'FF'FE, Memory::Bus::Code); // b +#0
+  test_code.WriteWord(0, 0xE0'C1'01'90); // smull r0, r1, r0, r1
+  test_code.WriteWord(4, 0xEA'FF'FF'FE); // b +#0
 
   auto jit = CreateCPU(CPU::Descriptor{test_code});
 
