@@ -76,12 +76,12 @@ struct JIT final : CPU {
 
   auto Run(int cycles) -> int override {
     if (WaitForIRQ() && !IRQLine()) {
-      return 0;
+      return cycles;
     }
 
-    cycles_to_run += cycles;
+    const int cycles_available = cycles + cycles_to_run;
 
-    int cycles_available = cycles_to_run;
+    cycles_to_run = cycles_available;
 
     while (cycles_to_run > 0) {
       if (IRQLine()) {
@@ -99,9 +99,8 @@ struct JIT final : CPU {
       cycles_to_run = backend->Call(*basic_block, cycles_to_run);
 
       if (WaitForIRQ()) {
-        int cycles_executed = cycles_available - cycles_to_run;
         cycles_to_run = 0;
-        return cycles_executed;
+        return cycles_available;
       }
     }
 
